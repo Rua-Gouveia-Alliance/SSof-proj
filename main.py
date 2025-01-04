@@ -1,12 +1,12 @@
 import sys
-import ast
-from astexport import export
+import esprima
 import json
 from copy import deepcopy
 
 def usage():
     print("Usage: main <filename>")
 
+# Not working since this function was developed for the Python AST
 def print_ast(currobj, indent):
     print(" " * 4 * indent + "Type: " + currobj["ast_type"] + ", line " + str(currobj.get("lineno", "-1")))
     for key, val in currobj.items():
@@ -16,7 +16,8 @@ def print_ast(currobj, indent):
         elif type(val) is dict:
             print_ast(val, indent+1)
 
-
+# Not working since this function was developed for the Python AST
+# Use this as a stepping stone to develop walk_expression and walk_statement
 def get_ast_paths(paths, currobj):
     currtype = currobj["ast_type"]
 
@@ -60,14 +61,23 @@ def get_ast_paths(paths, currobj):
             paths.extend(thiscyclepaths)
         return paths
 
+# TODO: returns Multilabel
+def walk_expression(expr, policy, multilabelling, vulnerabilities):
+    return
+
+# TODO: returns Multilabelling
+def walk_statement(expr, policy, multilabelling, vulnerabilites):
+    return
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         usage()
     filename = sys.argv[1]
-    text = open(filename).read()
-    parsed_ast = ast.parse(text)
-    ast_dict = export.export_dict(parsed_ast)
-    #print(print_ast(ast_dict, 0))
-    print(get_ast_paths([[]], ast_dict))
-    #print(json.dumps(ast_dict, indent=2))
+
+    with open(sys.argv[1], "r") as f:
+        program = f.read().strip()
+
+    program = open(filename).read()
+    ast_dict = esprima.parseScript(program, loc = True).toDict()
+    print(json.dumps(ast_dict, indent=2))
     

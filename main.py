@@ -2,6 +2,7 @@ import sys
 import esprima
 import json
 from copy import deepcopy
+from pattern import Pattern
 
 
 def usage():
@@ -83,16 +84,29 @@ def walk_statement(expr, policy, multilabelling, vulnerabilites):
     return
 
 
+def load_patterns(filename):
+    with open(filename, "r") as f:
+        content = f.read()
+
+    p_dict = json.loads(content)
+    patterns = []
+
+    for pattern in p_dict:
+        vuln = pattern.get("vulnerability", "NO NAME")
+        sources = pattern.get("sources", [])
+        sanitizers = pattern.get("sanitizers", [])
+        sinks = pattern.get("sinks", [])
+        implicit = False if pattern.get("implicit", "no") == "no" else True
+        patterns.append(Pattern(vuln, sources, sanitizers, sinks, implicit))
+        print(Pattern(vuln, sources, sanitizers, sinks, implicit))
+
+
 def extract_ast(filename):
     with open(filename, "r") as f:
         program = f.read()
 
     ast_dict = esprima.parseScript(program, loc=True).toDict()
     return json.dumps(ast_dict, indent=2)
-
-
-def load_patterns(filename):
-    pass  # TODO
 
 
 if __name__ == "__main__":
@@ -104,6 +118,3 @@ if __name__ == "__main__":
 
     ast = extract_ast(js_file)
     patterns = load_patterns(patterns_file)
-
-    print(ast)
-    print_ast(json.loads(ast), 0)

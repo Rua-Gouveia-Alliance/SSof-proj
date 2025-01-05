@@ -46,7 +46,10 @@ class MultiLabel:
 
         for pattern_name in patterns_names:
             for pattern in patterns:
-                if pattern_name == pattern.get_name():
+                if (
+                    pattern_name == pattern.get_name()
+                    and len(self._labels[pattern].get_taints()) > 0
+                ):
                     ml.set_label(pattern, self._labels[pattern])
 
         return ml
@@ -79,30 +82,3 @@ class MultiLabel:
             string += pattern.get_name() + ":\n" + str(label) + "\n\n"
 
         return string
-
-
-if __name__ == "__main__":
-    p1 = Pattern("p1", ["a"], ["s1"])
-    p2 = Pattern("p2", ["b", "c"], ["s2"])
-    p3 = Pattern("p3", ["d"], ["s3"])
-    ml1 = MultiLabel()
-    ml2 = MultiLabel()
-
-    ml1.add_pattern(p1)
-    ml1.add_pattern(p2)
-    ml2.add_pattern(p2)
-    ml2.add_pattern(p3)
-
-    ml1.add_source("a")
-    ml1.add_source("b")
-    ml1.add_sanitizer("s2")
-    ml2.add_source("c")
-    ml2.add_source("d")
-    ml2.add_sanitizer("s3")
-
-    print("ML1:")
-    print(ml1)
-    print("ML2:")
-    print(ml2)
-    print("ML1 + ML2")
-    print(ml1 + ml2)

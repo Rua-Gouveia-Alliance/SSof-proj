@@ -34,10 +34,6 @@ class Policy:
             if sink in pattern.get_sinks()
         ]
 
-    def get_sink_multilabel(self, sink: str, ml: MultiLabel):
+    def get_vulnerabilities(self, sink: str, ml: MultiLabel):
         patterns_with_sink = self.get_patterns_with_sink(sink)
         return ml.filter_patterns(patterns_with_sink)
-
-
-if __name__ == "__main__":
-    print("TODO: Needs testing")

@@ -2,6 +2,7 @@ import sys
 import esprima
 import json
 from copy import deepcopy
+from multilabel import MultiLabel
 from pattern import Pattern
 
 
@@ -76,7 +77,31 @@ def get_ast_paths(paths, currobj):
 
 # TODO: returns Multilabel
 def walk_expression(expr, policy, multilabelling, vulnerabilities):
-    return
+    expr_type = expr["type"]
+
+    if expr_type == "Literal":
+        # A literal has the lowest possible integrity for all patterns
+        return MultiLabel()
+    elif expr_type == "Identifier":
+        # If the identifier has been instantiated, return the multilabel associated to the variable
+        
+        # If the variable has not been instantiated, it has to be considered a source for every pattern
+
+        # For every pattern, we should check if the variable is a source
+
+        return MultiLabel()
+    elif expr_type == "UnaryExpression":
+        return MultiLabel()
+    elif expr_type == "BinaryExpression":
+        return MultiLabel()
+    elif expr_type == "CallExpression":
+        return MultiLabel()
+    elif expr_type == "MemberExpression":
+        return MultiLabel()
+    elif expr_type == "AssignmentExpression":
+        return MultiLabel()
+    else:
+        return MultiLabel()
 
 
 # TODO: returns Multilabelling

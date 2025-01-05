@@ -29,15 +29,15 @@ class MultiLabel:
     def add_pattern(self, pattern: Pattern):
         self._labels[pattern] = Label()
 
-    def add_source(self, source: str):
+    def add_source(self, source: str, line: int):
         for pattern, label in self._labels.items():
             if pattern.check_if_source(source):
-                label.add_source(source)
+                label.add_source(source, line)
     
-    def add_sanitizer(self, sanitizer: str):
+    def add_sanitizer(self, sanitizer: str, line: int):
         for pattern, label in self._labels.items():
             if pattern.check_if_sanitizer(sanitizer):
-                label.add_sanitizer(sanitizer)
+                label.add_sanitizer(sanitizer, line)
     
     def filter_patterns(self, patterns_names:list):
         ml = MultiLabel()
@@ -105,7 +105,3 @@ if __name__ == "__main__":
     print(ml2)
     print("ML1 + ML2")
     print(ml1 + ml2)
-
-
-    
-

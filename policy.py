@@ -5,6 +5,9 @@ class Policy:
     def __init__(self, patterns: list = None):
         self._patterns = patterns if patterns != None else []
     
+    def get_patterns():
+        return self._patterns
+
     def get_vuln_names(self):
         return [pattern.get_name() for pattern in self._patterns]
     

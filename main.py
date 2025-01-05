@@ -7,7 +7,7 @@ from pattern import Pattern
 
 
 def usage():
-    print("Usage: main <filename>")
+    print("Usage: main <program_file> <patterns_file>")
 
 
 def print_ast(currobj, indent):
@@ -83,14 +83,21 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
         # A literal has the lowest possible integrity for all patterns
         return MultiLabel()
     elif expr_type == "Identifier":
-        # If the identifier has been instantiated, return the multilabel associated to the variable
-        
-        # If the variable has not been instantiated, it has to be considered a source for every pattern
+        var_name = expr["name"]
+        line = expr["loc"]["start"]["line"]
 
-        # For every pattern, we should check if the variable is a source
+        # If variable is instantiated fetch its multilabel and add it as a source to the patterns where the variable is considered a source
+        if multilabelling.is_defined(var_name):
+            ml = multilabelling.get_multilabel(var_name)
+            ml.add_source(var_name, line)
+        # If the variable is not instantiated it has to be considered a source in every possible pattern
+        else:
+            ml = MultiLabel()
+            ml.add_source_to_all(var_name, line)
 
-        return MultiLabel()
+        return ml
     elif expr_type == "UnaryExpression":
+        
         return MultiLabel()
     elif expr_type == "BinaryExpression":
         return MultiLabel()
@@ -142,4 +149,5 @@ if __name__ == "__main__":
     patterns_file = sys.argv[2]
 
     ast = extract_ast(js_file)
+    print(ast)
     patterns = load_patterns(patterns_file)

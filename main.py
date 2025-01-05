@@ -84,7 +84,7 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
         return MultiLabel()
     elif expr_type == "Identifier":
         # If the identifier has been instantiated, return the multilabel associated to the variable
-        
+
         # If the variable has not been instantiated, it has to be considered a source for every pattern
 
         # For every pattern, we should check if the variable is a source

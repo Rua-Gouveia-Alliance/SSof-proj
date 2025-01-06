@@ -8,6 +8,9 @@ class MultiLabelling:
     def get_varnames(self):
         return self._var_lables.keys()
 
+    def is_defined(self, var_name: str):
+        return var_name in self._var_lables.keys()
+
     def get_multilabel(self, var_name:str):
         return self._var_lables.get(var_name, MultiLabel()).copy()
     

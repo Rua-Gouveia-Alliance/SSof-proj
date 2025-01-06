@@ -10,9 +10,8 @@ class MultiLabel:
         for pattern in patterns:
             self._labels[pattern] = Label()
     
-    # Only for debugging
     def get_mapping(self):
-        return self._labels
+        return self._labels.items()
 
     def get_patterns(self):
         return self._labels.keys()

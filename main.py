@@ -121,7 +121,6 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
         )
 
         # Get Multilabel of all arguments
-        arguments = expr["callee"]
         arg_multilabel = MultiLabel()
         for arg in expr["arguments"]:
             arg_multilabel += walk_expression(
@@ -134,11 +133,10 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
 
         # If function is a sink, store the vulnerabilities that the argument
         # might pass
-        if policy.get_patterns_with_sink(callee_name):
-            vulnerabilities.store_vulnerabilities(
-                policy.get_vulnerabilities(callee_name, arg_multilabel),
-                (callee_name, line),
-            )
+        vulnerabilities.store_vulnerabilities(
+            policy.get_vulnerabilities(callee_name, arg_multilabel),
+            (callee_name, line),
+        )
 
         return callee_multilabel + arg_multilabel
     elif expr_type == "MemberExpression":
@@ -194,7 +192,7 @@ def get_expr_name(expr):
         return get_expr_name(expr["property"])
     else:
         print("Unrecognized expression type: " + expr_type)
-        return None
+        return ""
 
 
 # In this function I am assuming that the left hand side of an assignment is
@@ -217,8 +215,10 @@ def get_lhs_sinks(expr, policy):
         )
     elif expr_type == "MemberExpression":
         if expr["computed"]:
-            return get_lhs_sinks(expr["object"])
-        return get_lhs_sinks(expr["object"]) + get_lhs_sinks(expr["property"])
+            return get_lhs_sinks(expr["object"], policy)
+        return get_lhs_sinks(expr["object"], policy) + get_lhs_sinks(
+            expr["property"], policy
+        )
     else:
         print("Unrecognized left hand side expression type: " + expr_type)
         return []

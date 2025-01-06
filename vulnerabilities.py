@@ -13,7 +13,7 @@ class Vulnerabilities:
     # Assuming the multilabel was already filtered to only contain the labels
     # with sink in its pattern
     # TODO: extract all vulnerabilities from the multilabel
-    def store_vulnerabilities(self, ml: "MultiLabel", sink: tuple):
+    def store_vulnerabilities(self, sink: tuple, ml: "MultiLabel"):
         for pattern, label in ml.get_mapping():
             self._vulnerabilities[pattern.get_name()].append((label, sink))
 

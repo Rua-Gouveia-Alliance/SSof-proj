@@ -3,6 +3,7 @@ import esprima
 import json
 from copy import deepcopy
 from multilabel import MultiLabel
+from multilabelling import MultiLabelling
 from pattern import Pattern
 
 
@@ -105,8 +106,19 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
 
 
 # TODO: returns Multilabelling
-def walk_statement(expr, policy, multilabelling, vulnerabilites):
-    return
+def walk_statement(stmt, policy, multilabelling, vulnerabilites):
+    stmt_type = stmt["type"]
+
+    if stmt_type == "BlockStatement":
+        return MultiLabelling()
+    elif stmt_type == "ExpressionStatement":
+        return MultiLabelling()
+    elif stmt_type == "IfStatement":
+        return MultiLabelling()
+    elif stmt_type == "WhileStatement":
+        return MultiLabelling()
+    else:
+        return MultiLabelling()
 
 
 def load_patterns(filename):

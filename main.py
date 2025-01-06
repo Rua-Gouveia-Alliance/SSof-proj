@@ -124,7 +124,7 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
 
         # If function is a sink, store the vulnerabilities that the argument might pass
         if policy.get_patterns_with_sink(callee_name):
-            vulnerabilities.store_vulnerabilities(policy.get_sink_multilabel(callee_name, arg_multilabel), (callee_name, line))
+            vulnerabilities.store_vulnerabilities(policy.get_vulnerabilities(callee_name, arg_multilabel), (callee_name, line))
 
         return callee_multilabel + arg_multilabel
     elif expr_type == "MemberExpression":
@@ -143,7 +143,7 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
         lhs_sinks = get_lhs_sinks(expr["left"], policy)
 
         for sink in lhs_sinks:
-            vulnerabilities.store_vulnerabilities(policy.get_sink_multilabel(sink[0], rhs_multilabel), sink)
+            vulnerabilities.store_vulnerabilities(policy.get_vulnerabilities(sink[0], rhs_multilabel), sink)
 
         # Update Multilabelling
         if assigned_name is not None:

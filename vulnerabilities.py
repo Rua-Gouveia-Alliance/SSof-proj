@@ -14,15 +14,6 @@ class Vulnerabilities:
         for pattern, label in ml.get_mapping():
             self._vulnerabilities[pattern.get_name()].append((label, sink))
     
-    def print_vulnerability(self, vuln_name: str):
-        for vuln in self._vulnerabilities[vuln_name]:
-            sources, sanitizers, sink = vuln
-
-            if len(sanitizers) == 0:
-                print(f"Serious vulnerability!\nInformation originating from {sources} reaches {sink} without any sanitization!")
-            else:
-                print(f"Warning!\nInformation originating from {sources} reaches {sink} but goes through some sanitizers {sanitizers}!")
-
     def get_json(self):
         json = []
         for vuln_name, labels in self._vulnerabilities.items():
@@ -46,14 +37,3 @@ class Vulnerabilities:
                     json.append(vuln)
         
         return json
-
-    def __str__(self):
-        out = ""
-        for vuln, labels in self._vulnerabilities.items():
-            out += "VULNERABILITY " + vuln + "\n"
-            for (label, sink) in labels:
-                out += "\t" + str(label) + " " + str(sink) + "\n"
-        return out
-
-if __name__ == "__main__":
-    print("TODO: Needs testing")

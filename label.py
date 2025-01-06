@@ -30,7 +30,7 @@ class Label:
 
     def set_taints(self, taints):
         self._taints = taints
-    
+
     def __add__(self, l: "Label"):
         # Creates a copy as to not modify the original label
         new_label = self.copy()
@@ -43,33 +43,6 @@ class Label:
 
     def copy(self):
         return Label(copy.deepcopy(self._taints))
-    
+
     def __str__(self):
         return str(list(self._taints.items()))
-
-if __name__ == "__main__":
-    l1 = Label()
-    l2 = Label()
-
-    l1.add_source("x", 1)
-    print(l1)
-    l1.add_source("y", 2)
-    l1.add_sanitizer("s1", 3)
-    l1.add_source("z", 4)
-    l1.add_sanitizer("s2", 5)
-    print("L1")
-    print(l1)
-    print()
-
-    l2.add_source("y", 2)
-    l2.add_sanitizer("s1", 3)
-    l2.add_sanitizer("s2", 5)
-    l2.add_source("x", 1)
-    print("L2")
-    print(l2)
-    print()
-
-    l3 = l1 + l2
-    print("L3")
-    print(l3)
-    print()

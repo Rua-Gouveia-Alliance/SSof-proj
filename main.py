@@ -3,6 +3,7 @@ import esprima
 import json
 from copy import deepcopy
 from multilabel import MultiLabel
+from multilabelling import MultiLabelling
 from pattern import Pattern
 from policy import Policy
 from multilabelling import MultiLabelling
@@ -186,8 +187,21 @@ def get_lhs_sinks(expr, policy):
         return []
 
 # TODO: returns Multilabelling
-def walk_statement(expr, policy, multilabelling, vulnerabilites):
-    return
+def walk_statement(stmt, policy, multilabelling, vulnerabilities):
+    stmt_type = stmt["type"]
+
+    if stmt_type == "BlockStatement":
+        for s in stmt.get("body", []):
+            multilabelling = walk_statement(s, policy, multilabelling, vulnerabilities)
+        return multilabelling
+    elif stmt_type == "ExpressionStatement":
+        return MultiLabelling()
+    elif stmt_type == "IfStatement":
+        return MultiLabelling()
+    elif stmt_type == "WhileStatement":
+        return MultiLabelling()
+    else:
+        return MultiLabelling()
 
 
 def load_patterns(filename):

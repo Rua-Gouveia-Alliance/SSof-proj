@@ -29,11 +29,6 @@ class Vulnerabilities:
             i = 1
             for (label, sink) in labels:
                 for source, sanitizer_flows in label.get_taints().items():
-                    print("DEBUG:")
-                    print()
-                    print(source)
-                    print(sanitizer_flows)
-
                     vuln = dict()
 
                     vuln["vulnerability"] = vuln_name + "_" + str(i)

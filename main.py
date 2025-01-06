@@ -82,9 +82,6 @@ def get_ast_paths(paths, currobj):
 def walk_expression(expr, policy, multilabelling, vulnerabilities):
     expr_type = expr["type"]
 
-    print("EXPR TYPE: " + expr_type)
-    print(expr_type == "Identifier")
-
     if expr_type == "Literal":
         # A literal has the highest possible integrity for all patterns
         return MultiLabel()
@@ -232,10 +229,7 @@ if __name__ == "__main__":
     patterns = load_patterns(patterns_file)
     policy = Policy(patterns)
     multilabelling = MultiLabelling()
-    print("TEEEEST: " + str([pattern.get_name() for pattern in patterns]))
     vulnerabilities = Vulnerabilities([pattern.get_name() for pattern in patterns])
-    print(vulnerabilities._vulnerabilities)
-    print(ast)
     walk_expression(ast["body"][0]["expression"], policy, multilabelling, vulnerabilities)
     print()
     print("JSON")

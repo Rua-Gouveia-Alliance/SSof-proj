@@ -267,7 +267,6 @@ def load_patterns(filename):
         sinks = pattern.get("sinks", [])
         implicit = False if pattern.get("implicit", "no") == "no" else True
         patterns.append(Pattern(vuln, sources, sanitizers, sinks, implicit))
-        print(Pattern(vuln, sources, sanitizers, sinks, implicit))
 
     return patterns
 
@@ -293,6 +292,6 @@ if __name__ == "__main__":
     policy = Policy(patterns)
     multilabelling = MultiLabelling()
     vulnerabilities = Vulnerabilities([pattern.get_name() for pattern in patterns])
-    walk_statement(ast["body"][0], policy, multilabelling, vulnerabilities)
-    print("JSON")
-    print(json.dumps(vulnerabilities.get_json(), indent=2))
+    for stmt in ast["body"]:
+        walk_statement(stmt, policy, multilabelling, vulnerabilities)
+    print(json.dumps(vulnerabilities.get_json(), indent=4), end="")

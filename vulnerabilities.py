@@ -3,13 +3,15 @@ from label import Label
 
 
 class Vulnerabilities:
-    # Vulnerabilities is a dictionary where vulnerabilits' names are the keys and the values are all relevant info on the illegal flows that were found
+    # Vulnerabilities is a dictionary where vulnerabilits' names are the keys
+    # and the values are all relevant info on the illegal flows that were found
     def __init__(self, vuln_names: list):
         self._vulnerabilities = dict()
         for name in vuln_names:
             self._vulnerabilities[name] = []
 
-    # Assuming the multilabel was already filtered to only contain the labels with sink in its pattern
+    # Assuming the multilabel was already filtered to only contain the labels
+    # with sink in its pattern
     # TODO: extract all vulnerabilities from the multilabel
     def store_vulnerabilities(self, sink: tuple, ml: "MultiLabel"):
         for pattern, label in ml.get_mapping():
@@ -27,11 +29,9 @@ class Vulnerabilities:
                     vuln["source"] = list(source)
                     vuln["sink"] = list(sink)
 
-                    # TODO: Change this when implicit flows are implemented
-                    vuln["implicit_flows"] = False
-
-                    # TODO: Fix bug in Label so that flows with same source/sink are grouped in list of lists of sanitizers
-                    vuln["unsanitized_flows"] = [] in sanitizer_flows
+                    # TODO: Fix bug in Label so that flows with same source/sink
+                    # are grouped in list of lists of sanitizers
+                    vuln["unsanitized_flows"] = "yes" if [] in sanitizer_flows else "no"
 
                     without_unsanitized = [
                         [list(sanitizer) for sanitizer in sanitizer_flow]
@@ -39,6 +39,9 @@ class Vulnerabilities:
                         if sanitizer_flow
                     ]
                     vuln["sanitized_flows"] = without_unsanitized
+
+                    # TODO: Change this when implicit flows are implemented
+                    vuln["implicit"] = "no"
                     json.append(vuln)
 
         return json

@@ -170,7 +170,7 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
             )
 
         # Update Multilabelling
-        if assigned_name is not None:
+        if assigned_name != "":
             multilabelling.set_multilabel(assigned_name, rhs_multilabel)
 
         # I might be missing something but the returned Multilabel might be
@@ -228,6 +228,7 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities):
     stmt_type = stmt["type"]
 
     if stmt_type == "BlockStatement":
+        multilabel = MultiLabel()
         for s in stmt.get("body", []):
             multilabel = walk_statement(s, policy, multilabelling, vulnerabilities)
         return multilabel

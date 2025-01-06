@@ -43,5 +43,6 @@ class Vulnerabilities:
                     # TODO: Change this when implicit flows are implemented
                     vuln["implicit"] = "no"
                     json.append(vuln)
+                    i += 1
 
         return json

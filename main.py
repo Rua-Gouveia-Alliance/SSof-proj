@@ -106,11 +106,13 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
 
 
 # TODO: returns Multilabelling
-def walk_statement(stmt, policy, multilabelling, vulnerabilites):
+def walk_statement(stmt, policy, multilabelling, vulnerabilities):
     stmt_type = stmt["type"]
 
     if stmt_type == "BlockStatement":
-        return MultiLabelling()
+        for s in stmt.get("body", []):
+            multilabelling = walk_statement(s, policy, multilabelling, vulnerabilities)
+        return multilabelling
     elif stmt_type == "ExpressionStatement":
         return MultiLabelling()
     elif stmt_type == "IfStatement":

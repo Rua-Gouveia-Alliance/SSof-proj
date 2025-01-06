@@ -12,7 +12,7 @@ class MultiLabelling:
     def is_defined(self, var_name: str):
         return var_name in self._var_lables.keys()
 
-    def get_multilabel(self, var_name:str):
+    def get_multilabel(self, var_name: str):
         return self._var_lables.get(var_name, MultiLabel()).copy()
 
     # define Multilabel.copy

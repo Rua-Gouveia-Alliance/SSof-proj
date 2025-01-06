@@ -10,7 +10,7 @@ class MultiLabel:
         self._labels = dict()
         for pattern in patterns:
             self._labels[pattern] = Label()
-    
+
     def get_mapping(self):
         return self._labels.items()
 
@@ -38,12 +38,12 @@ class MultiLabel:
         for pattern, label in self._labels.items():
             if pattern.check_if_sanitizer(sanitizer):
                 label.add_sanitizer(sanitizer, line)
-    
+
     def add_source_to_all(self, var_name, line):
         for label in self._labels.values():
             label.add_source(var_name, line)
 
-    def filter_patterns(self, patterns_names:list):
+    def filter_patterns(self, patterns_names: list):
         ml = MultiLabel()
         patterns = self.get_patterns()
 

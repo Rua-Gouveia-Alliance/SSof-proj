@@ -6,7 +6,6 @@ from multilabel import MultiLabel
 from multilabelling import MultiLabelling
 from pattern import Pattern
 from policy import Policy
-from multilabelling import MultiLabelling
 from vulnerabilities import Vulnerabilities
 
 
@@ -79,7 +78,9 @@ def get_ast_paths(paths, currobj):
         return paths
 
 
-# TODO: Assumes sources/sanitizers/sinks are simple names without ".". We can try to augment it to consider these cases although it would only count as bonus work
+# TODO: Assumes sources/sanitizers/sinks are simple names without ".". We can
+# try to augment it to consider these cases although it would only count as
+# bonus work
 def walk_expression(expr, policy, multilabelling, vulnerabilities):
     expr_type = expr["type"]
 
@@ -90,70 +91,97 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
         var_name = expr["name"]
         line = expr["loc"]["start"]["line"]
 
-        # If variable is instantiated fetch its multilabel and add it as a source to the patterns where the variable is considered a source
+        # If variable is instantiated fetch its multilabel and add it as a
+        # source to the patterns where the variable is considered a source
         if multilabelling.is_defined(var_name):
             ml = multilabelling.get_multilabel(var_name)
             ml.add_source(var_name, line)
-        # If the variable is not instantiated it has to be considered a source in every possible pattern
+        # If the variable is not instantiated it has to be considered a
+        # source in every possible pattern
         else:
             ml = MultiLabel(policy.get_patterns())
             ml.add_source_to_all(var_name, line)
         return ml
     elif expr_type == "UnaryExpression":
-        return walk_expression(expr["argument"], policy, multilabelling, vulnerabilities)
+        return walk_expression(
+            expr["argument"], policy, multilabelling, vulnerabilities
+        )
     elif expr_type == "BinaryExpression":
         left = walk_expression(expr["left"], policy, multilabelling, vulnerabilities)
         right = walk_expression(expr["right"], policy, multilabelling, vulnerabilities)
-        return left + right 
+        return left + right
     elif expr_type == "CallExpression":
         line = expr["loc"]["start"]["line"]
 
         # Get Multilabel of callee and callee name
         callee = expr["callee"]
         callee_name = get_expr_name(callee)
-        callee_multilabel = walk_expression(expr["callee"], policy, multilabelling, vulnerabilities)
+        callee_multilabel = walk_expression(
+            expr["callee"], policy, multilabelling, vulnerabilities
+        )
 
         # Get Multilabel of all arguments
         arguments = expr["callee"]
         arg_multilabel = MultiLabel()
         for arg in expr["arguments"]:
-            arg_multilabel += walk_expression(arg, policy, multilabelling, vulnerabilities)
+            arg_multilabel += walk_expression(
+                arg, policy, multilabelling, vulnerabilities
+            )
 
-        # If function is a sanitizer, apply the sanitizer to the arguments multilabel
-        arg_multilabel.add_sanitizer(callee_name)
+        # If function is a sanitizer, apply the sanitizer to the arguments
+        # multilabel
+        arg_multilabel.add_sanitizer(callee_name, line)
 
-        # If function is a sink, store the vulnerabilities that the argument might pass
+        # If function is a sink, store the vulnerabilities that the argument
+        # might pass
         if policy.get_patterns_with_sink(callee_name):
-            vulnerabilities.store_vulnerabilities(policy.get_vulnerabilities(callee_name, arg_multilabel), (callee_name, line))
+            vulnerabilities.store_vulnerabilities(
+                policy.get_vulnerabilities(callee_name, arg_multilabel),
+                (callee_name, line),
+            )
 
         return callee_multilabel + arg_multilabel
     elif expr_type == "MemberExpression":
-        obj_multilabel = walk_expression(expr["object"], policy, multilabelling, vulnerabilities)
-        prop_multilabel = walk_expression(expr["property"], policy, multilabelling, vulnerabilities)
+        obj_multilabel = walk_expression(
+            expr["object"], policy, multilabelling, vulnerabilities
+        )
+        prop_multilabel = walk_expression(
+            expr["property"], policy, multilabelling, vulnerabilities
+        )
 
         return obj_multilabel + prop_multilabel
     elif expr_type == "AssignmentExpression":
         assigned_name = get_expr_name(expr["left"])
-        rhs_multilabel = walk_expression(expr["right"], policy, multilabelling, vulnerabilities)
-        
-        # Uncomment this if shenanigans such as "a.b().c = d" have to be considered.
-        # If so, a way to speed up the program would be to skip get_lhs skips and augment the Json nodes to store information if a certain name is a sink or not.
-        # The higher level node will get that information after visiting the child and augment it to its parent and so on. The AssignmentExpression, in the end, will have a list of sinks of the lhs
+        rhs_multilabel = walk_expression(
+            expr["right"], policy, multilabelling, vulnerabilities
+        )
+
+        # Uncomment this if shenanigans such as "a.b().c = d" have to be
+        # considered. If so, a way to speed up the program would be to skip
+        # get_lhs skips and augment the Json nodes to store information if a
+        # certain name is a sink or not. The higher level node will get that
+        # information after visiting the child and augment it to its parent and
+        # so on. The AssignmentExpression, in the end, will have a list of sinks
+        # of the lhs.
         # walk_expression(expr["left"], policy, multilabelling, vulnerabilities)
         lhs_sinks = get_lhs_sinks(expr["left"], policy)
 
         for sink in lhs_sinks:
-            vulnerabilities.store_vulnerabilities(policy.get_vulnerabilities(sink[0], rhs_multilabel), sink)
+            vulnerabilities.store_vulnerabilities(
+                policy.get_vulnerabilities(sink[0], rhs_multilabel), sink
+            )
 
         # Update Multilabelling
         if assigned_name is not None:
             multilabelling.set_multilabel(assigned_name, rhs_multilabel)
 
-        # I might be missing something but the returned Multilabel might be irrelevant in this case
+        # I might be missing something but the returned Multilabel might be
+        # irrelevant in this case
         return MultiLabel()
     else:
         print("Unrecognized expression type: " + expr_type)
         return MultiLabel()
+
 
 def get_expr_name(expr):
     expr_type = expr["type"]
@@ -168,16 +196,25 @@ def get_expr_name(expr):
         print("Unrecognized expression type: " + expr_type)
         return None
 
-# In this function I am assuming that the left hand side of an assignment is either a single Identifier or a MemberExpression such as "a.b.c ..." or "a.b['test']"
-# I am not considering shenanigans such as "a.b().c = d"
-# If these have to be considered for some reason, one solution is to call walk_expression and augment the Json nodes to store information if a certain name is a sink or not.
-# The higher level node will get that information after visiting the child and augment it to its parent and so on. The AssignmentExpression, in the end, will have a list of sinks of the lhs
+
+# In this function I am assuming that the left hand side of an assignment is
+# either a single Identifier or a MemberExpression such as "a.b.c ..." or
+# "a.b['test']". I am not considering shenanigans such as "a.b().c = d". If
+# these have to be considered for some reason, one solution is to call
+# walk_expression and augment the Json nodes to store information if a certain
+# name is a sink or not. The higher level node will get that information after
+# visiting the child and augment it to its parent and so on. The
+# AssignmentExpression, in the end, will have a list of sinks of the lhs
 def get_lhs_sinks(expr, policy):
     expr_type = expr["type"]
 
     if expr_type == "Identifier":
         line = expr["loc"]["start"]["line"]
-        return [(expr["name"], line)] if policy.get_patterns_with_sink(expr["name"]) else []
+        return (
+            [(expr["name"], line)]
+            if policy.get_patterns_with_sink(expr["name"])
+            else []
+        )
     elif expr_type == "MemberExpression":
         if expr["computed"]:
             return get_lhs_sinks(expr["object"])
@@ -186,22 +223,34 @@ def get_lhs_sinks(expr, policy):
         print("Unrecognized left hand side expression type: " + expr_type)
         return []
 
-# TODO: returns Multilabelling
+
 def walk_statement(stmt, policy, multilabelling, vulnerabilities):
     stmt_type = stmt["type"]
 
     if stmt_type == "BlockStatement":
         for s in stmt.get("body", []):
-            multilabelling = walk_statement(s, policy, multilabelling, vulnerabilities)
-        return multilabelling
+            multilabel = walk_statement(s, policy, multilabelling, vulnerabilities)
+        return multilabel
     elif stmt_type == "ExpressionStatement":
-        return MultiLabelling()
+        return walk_expression(
+            stmt["expression"], policy, multilabelling, vulnerabilities
+        )
     elif stmt_type == "IfStatement":
-        return MultiLabelling()
+        cond = walk_expression(stmt["test"], policy, multilabelling, vulnerabilities)
+        consequent = walk_statement(
+            stmt["consequent"], policy, multilabelling, vulnerabilities
+        )
+        # Alternate is not always present
+        alternate = (
+            walk_statement(stmt["alternate"], policy, multilabelling, vulnerabilities)
+            if "alternate" in stmt
+            else MultiLabel()
+        )
+        return cond + consequent + alternate
     elif stmt_type == "WhileStatement":
-        return MultiLabelling()
-    else:
-        return MultiLabelling()
+        return MultiLabel()
+
+    return MultiLabel()
 
 
 def load_patterns(filename):
@@ -219,7 +268,7 @@ def load_patterns(filename):
         implicit = False if pattern.get("implicit", "no") == "no" else True
         patterns.append(Pattern(vuln, sources, sanitizers, sinks, implicit))
         print(Pattern(vuln, sources, sanitizers, sinks, implicit))
-    
+
     return patterns
 
 
@@ -228,7 +277,7 @@ def extract_ast(filename):
         program = f.read()
 
     ast_dict = esprima.parseScript(program, loc=True).toDict()
-    # print json.dumps(ast_dict, indent=2)
+    # print(json.dumps(ast_dict, indent=2))
     return ast_dict
 
 
@@ -244,8 +293,6 @@ if __name__ == "__main__":
     policy = Policy(patterns)
     multilabelling = MultiLabelling()
     vulnerabilities = Vulnerabilities([pattern.get_name() for pattern in patterns])
-    walk_expression(ast["body"][0]["expression"], policy, multilabelling, vulnerabilities)
-    print()
+    walk_statement(ast["body"][0], policy, multilabelling, vulnerabilities)
     print("JSON")
     print(json.dumps(vulnerabilities.get_json(), indent=2))
-

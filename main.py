@@ -237,5 +237,7 @@ if __name__ == "__main__":
     print(vulnerabilities._vulnerabilities)
     print(ast)
     walk_expression(ast["body"][0]["expression"], policy, multilabelling, vulnerabilities)
-    print(vulnerabilities.get_json())
+    print()
+    print("JSON")
+    print(json.dumps(vulnerabilities.get_json(), indent=2))
 

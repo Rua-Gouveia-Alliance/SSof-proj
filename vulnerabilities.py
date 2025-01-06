@@ -28,22 +28,29 @@ class Vulnerabilities:
         for vuln_name, labels in self._vulnerabilities.items():
             i = 1
             for (label, sink) in labels:
-                vuln = dict()
-                sanitizers = [list(sanitizer) for sanitizer in label[1]]
+                for source, sanitizer_flows in label.get_taints().items():
+                    print("DEBUG:")
+                    print()
+                    print(source)
+                    print(sanitizer_flows)
 
-                vuln["vulnerability"] = vuln_name
-                vuln["source"] = list(label[0])
-                vuln["sink"] = list(sink)
+                    vuln = dict()
 
-                # TODO: Change this when implicit flows are implemented
-                vuln["implicit_flows"] = False
+                    vuln["vulnerability"] = vuln_name + "_" + str(i)
+                    vuln["source"] = list(source)
+                    vuln["sink"] = list(sink)
 
-                # TODO: Fix bug in Label so that flows with same source/sink are grouped in list of lists of sanitizers
-                vuln["unsanitized_flows"] = sanitizers != []
-                vuln["sanitized_flows"] = sanitizers
+                    # TODO: Change this when implicit flows are implemented
+                    vuln["implicit_flows"] = False
 
+                    # TODO: Fix bug in Label so that flows with same source/sink are grouped in list of lists of sanitizers
+                    vuln["unsanitized_flows"] = [] in sanitizer_flows
 
-                
+                    without_unsanitized = [[list(sanitizer) for sanitizer in sanitizer_flow] for sanitizer_flow in sanitizer_flows if sanitizer_flow]
+                    vuln["sanitized_flows"] = without_unsanitized
+                    json.append(vuln)
+        
+        return json
 
     def __str__(self):
         out = ""

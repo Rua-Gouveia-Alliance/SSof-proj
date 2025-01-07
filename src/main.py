@@ -100,8 +100,11 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
         # If the variable is not instantiated it has to be considered a
         # source in every possible pattern
         else:
-            ml = MultiLabel(policy.get_patterns())
-            ml.add_source_to_all(var_name, line)
+            if var_name not in policy.get_sanitizers():
+                ml = MultiLabel(policy.get_patterns())
+                ml.add_source_to_all(var_name, line)
+            else:
+                return MultiLabel()
         return ml
     elif expr_type == "UnaryExpression":
         return walk_expression(
@@ -302,6 +305,8 @@ if __name__ == "__main__":
 
     # create multilabelling and vulnerabilities instance
     multilabelling = MultiLabelling()
+    for source in policy.get_sources():
+        multilabelling.set_multilabel(source, MultiLabel(policy.get_patterns()))
     vulnerabilities = Vulnerabilities([pattern.get_name() for pattern in patterns])
 
     # walk through all statements in the program

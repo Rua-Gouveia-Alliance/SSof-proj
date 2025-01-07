@@ -12,6 +12,18 @@ class Policy:
     def get_vuln_names(self):
         return [pattern.get_name() for pattern in self._patterns]
 
+    def get_sanitizers(self):
+        return [
+            sanitizer
+            for pattern in self._patterns
+            for sanitizer in pattern.get_sanitizers()
+        ]
+
+    def get_sources(self):
+        return [
+            source for pattern in self._patterns for source in pattern.get_sources()
+        ]
+
     # Check if patterns or patterns' names should be returned
     def get_patterns_with_source(self, source: str):
         return [

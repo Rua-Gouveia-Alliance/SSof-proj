@@ -249,7 +249,14 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities):
         )
         return cond + consequent + alternate
     elif stmt_type == "WhileStatement":
-        return MultiLabel()
+        cond = walk_expression(stmt["test"], policy, multilabelling, vulnerabilities)
+
+        body_multilabel = MultiLabel()
+        for _ in range(2):
+            body_multilabel += walk_statement(
+                stmt["body"], policy, multilabelling, vulnerabilities
+            )
+        return cond + body_multilabel
 
     return MultiLabel()
 

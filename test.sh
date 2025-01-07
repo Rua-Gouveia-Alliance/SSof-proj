@@ -17,8 +17,8 @@ for DIR in $TESTDIRS; do
         TESTNAME=${TEST%.js}
         PATTERNS="$TESTNAME".patterns.json
         OUT="$TESTNAME".output.json
-        MYOUT="${TESTNAME}".myoutput.json
-        python main.py "$TEST" "$PATTERNS" > "$MYOUT"
-        { diff "$MYOUT" "$OUT" > /dev/null && echo "$TESTNAME $PASSED"; } || echo "$TESTNAME $FAILED"
+        MYOUT=./output/$(basename "$TESTNAME").output.json
+        python main.py "$TEST" "$PATTERNS"
+        python validate.py -o "$MYOUT" -t "$OUT"
     done
 done

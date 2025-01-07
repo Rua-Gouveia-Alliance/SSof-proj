@@ -310,7 +310,6 @@ if __name__ == "__main__":
 
     # get output
     vulnerabilities_json = vulnerabilities.get_json()
-    print(json.dumps(vulnerabilities_json, indent=4), end="")  # debug
 
     # save output
     os.makedirs("./output", exist_ok=True)

@@ -1,12 +1,5 @@
 #!/bin/bash
 
-# Defining colors
-RES=$(tput sgr0)
-RED=$(tput setaf 1)$(tput bold)
-GREEN=$(tput setaf 2)$(tput bold)
-FAILED="${RED}failed$RES"
-PASSED="${GREEN}passed$RES"
-
 # Getting tests from the test directory
 TESTDIRS=$(ls slices)
 

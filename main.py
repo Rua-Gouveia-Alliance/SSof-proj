@@ -1,6 +1,7 @@
 import sys
 import esprima
 import json
+import os
 from copy import deepcopy
 from multilabel import MultiLabel
 from multilabelling import MultiLabelling
@@ -295,11 +296,26 @@ if __name__ == "__main__":
     js_file = sys.argv[1]
     patterns_file = sys.argv[2]
 
-    ast = extract_ast(js_file)
-    patterns = load_patterns(patterns_file)
-    policy = Policy(patterns)
+    ast = extract_ast(js_file)  # load ast
+    patterns = load_patterns(patterns_file)  # load patterns
+    policy = Policy(patterns)  # create policy from patterns
+
+    # create multilabelling and vulnerabilities instance
     multilabelling = MultiLabelling()
     vulnerabilities = Vulnerabilities([pattern.get_name() for pattern in patterns])
+
+    # walk through all statements in the program
     for stmt in ast["body"]:
         walk_statement(stmt, policy, multilabelling, vulnerabilities)
-    print(json.dumps(vulnerabilities.get_json(), indent=4), end="")
+
+    # get output
+    vulnerabilities_json = vulnerabilities.get_json()
+    print(json.dumps(vulnerabilities_json, indent=4), end="")  # debug
+
+    # save output
+    os.makedirs("./output", exist_ok=True)
+    output_file = os.path.join(
+        "./output", f"{os.path.splitext(os.path.basename(js_file))[0]}.output.json"
+    )
+    with open(output_file, "w") as f:
+        json.dump(vulnerabilities_json, f, indent=4)

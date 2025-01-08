@@ -96,7 +96,11 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
         # source to the patterns where the variable is considered a source
         if multilabelling.is_defined(var_name):
             ml = multilabelling.get_multilabel(var_name)
-            ml.add_source(var_name, line)
+
+            if multilabelling.has_not_initialized_flow(var_name):
+                ml.add_source_to_all(var_name, line)
+            else:
+                ml.add_source(var_name, line)
         # If the variable is not instantiated it has to be considered a
         # source in every possible pattern
         else:
@@ -144,7 +148,7 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
         # multilabel
         arg_multilabel.add_sanitizer(callee_name, line)
 
-        # If function is a sink, store the vulnerabilities that the argument
+        # If function is a sink, store the vulnerabilities that the arguments
         # might pass
         vulnerabilities.store_vulnerabilities(
             policy.get_vulnerabilities(callee_name, arg_multilabel),
@@ -240,27 +244,35 @@ def get_lhs_sinks(expr, policy):
 def walk_statement(stmt, policy, multilabelling, vulnerabilities):
     stmt_type = stmt["type"]
 
-    if stmt_type == "BlockStatement":
-        multilabel = MultiLabel()
+    if stmt_type == "Program" or stmt_type == "BlockStatement":
         for s in stmt.get("body", []):
-            multilabel = walk_statement(s, policy, multilabelling, vulnerabilities)
-        return multilabel
+            multilabelling = walk_statement(s, policy, multilabelling, vulnerabilities)
+        return multilabelling
     elif stmt_type == "ExpressionStatement":
-        return walk_expression(
+        walk_expression(
             stmt["expression"], policy, multilabelling, vulnerabilities
         )
+
+        return multilabelling
     elif stmt_type == "IfStatement":
+        # Cond will only be used to track implicit flows. For now it is not used
         cond = walk_expression(stmt["test"], policy, multilabelling, vulnerabilities)
+
+        ml_copy = multilabelling.copy()
+
+        # MultiLabelling of the "if" branch
         consequent = walk_statement(
             stmt["consequent"], policy, multilabelling, vulnerabilities
         )
+        
         # Alternate is not always present
         alternate = (
-            walk_statement(stmt["alternate"], policy, multilabelling, vulnerabilities)
+            walk_statement(stmt["alternate"], policy, ml_copy, vulnerabilities)
             if "alternate" in stmt
-            else MultiLabel()
+            else ml_copy
         )
-        return cond + consequent + alternate
+
+        return consequent + alternate
     elif stmt_type == "WhileStatement":
         cond = walk_expression(stmt["test"], policy, multilabelling, vulnerabilities)
 
@@ -270,9 +282,9 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities):
                 stmt["body"], policy, multilabelling, vulnerabilities
             )
         return cond + body_multilabel
-
-    return MultiLabel()
-
+    else:
+        print("Unrecognized statement type: " + expr_type)
+        return MultiLabelling()
 
 def load_patterns(filename):
     with open(filename, "r") as f:
@@ -317,8 +329,7 @@ if __name__ == "__main__":
     vulnerabilities = Vulnerabilities([pattern.get_name() for pattern in patterns])
 
     # walk through all statements in the program
-    for stmt in ast["body"]:
-        walk_statement(stmt, policy, multilabelling, vulnerabilities)
+    walk_statement(ast, policy, multilabelling, vulnerabilities)
 
     # get output
     vulnerabilities_json = vulnerabilities.get_json()

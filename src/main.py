@@ -119,10 +119,19 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
 
         # Get Multilabel of callee and callee name
         callee = expr["callee"]
-        callee_name = get_expr_name(callee)
-        callee_multilabel = walk_expression(
-            expr["callee"], policy, multilabelling, vulnerabilities
-        )
+
+        # CallExpressions of the form a()
+        if (callee["type"] == "Identifier"):
+            callee_name = callee["name"]
+            callee_multilabel = MultiLabel(policy.get_patterns())
+            callee_multilabel.add_source(callee_name, line)
+        # CallExpressions of the form a.b.c()
+        else:
+            callee_name = callee["property"]["name"]
+            callee_multilabel = walk_expression(
+                expr["callee"]["object"], policy, multilabelling, vulnerabilities
+            )
+            callee_multilabel.add_source(callee_name, line)
 
         # Get Multilabel of all arguments
         arg_multilabel = MultiLabel()
@@ -305,8 +314,6 @@ if __name__ == "__main__":
 
     # create multilabelling and vulnerabilities instance
     multilabelling = MultiLabelling()
-    for source in policy.get_sources():
-        multilabelling.set_multilabel(source, MultiLabel(policy.get_patterns()))
     vulnerabilities = Vulnerabilities([pattern.get_name() for pattern in patterns])
 
     # walk through all statements in the program

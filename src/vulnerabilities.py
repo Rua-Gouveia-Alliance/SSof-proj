@@ -1,5 +1,4 @@
 from multilabel import MultiLabel
-from label import Label
 
 
 class Vulnerabilities:
@@ -15,8 +14,18 @@ class Vulnerabilities:
     # TODO: extract all vulnerabilities from the multilabel
     def store_vulnerabilities(self, ml: "MultiLabel", sink: tuple):
         for pattern, label in ml.get_mapping():
-            if (label, sink) not in self._vulnerabilities[pattern.get_name()]:
-                self._vulnerabilities[pattern.get_name()].append((label, sink))
+            if (label["explicit"], sink) not in self._vulnerabilities[
+                pattern.get_name()
+            ]:
+                self._vulnerabilities[pattern.get_name()].append(
+                    (label["explicit"], sink)
+                )
+            if (label["implicit"], sink) not in self._vulnerabilities[
+                pattern.get_name()
+            ] and pattern.is_implicit():
+                self._vulnerabilities[pattern.get_name()].append(
+                    (label["implicit"], sink)
+                )
 
     def get_json(self):
         json = []
@@ -25,7 +34,6 @@ class Vulnerabilities:
             for label, sink in labels:
                 for source, sanitizer_flows in label.get_taints().items():
                     vuln = dict()
-
                     vuln["vulnerability"] = vuln_name + "_" + str(i)
                     vuln["source"] = list(source)
                     vuln["sink"] = list(sink)
@@ -40,9 +48,8 @@ class Vulnerabilities:
                         if sanitizer_flow
                     ]
                     vuln["sanitized_flows"] = without_unsanitized
+                    vuln["implicit"] = "yes" if label.is_implicit() else "no"
 
-                    # TODO: Change this when implicit flows are implemented
-                    vuln["implicit"] = "no"
                     json.append(vuln)
                     i += 1
 

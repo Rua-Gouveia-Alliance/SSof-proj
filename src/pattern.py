@@ -72,9 +72,14 @@ class Pattern:
         return name in self._sinks
 
     def __str__(self):
-        return f"Vulnerability: {self._vuln_name}\nSources: {self._sources}\nSanitizers: {self._sanitizers}\nSinks: {self._sinks}\nImplicit: {'yes' if self._implicit else 'no'}"
+        return (
+            f"Vulnerability: {self._vuln_name}\nSources: {self._sources}\n"
+            + f"Sanitizers: {self._sanitizers}\nSinks: {self._sinks}\nImplicit:"
+            + f" {'yes' if self._implicit else 'no'}"
+        )
 
-    # This considers that two different vulnerabilities cannot have the same name and different characteristics
+    # This considers that two different vulnerabilities cannot have the same
+    # name and different characteristics
     def __eq__(self, p):
         return self._vuln_name == p.get_name()
 

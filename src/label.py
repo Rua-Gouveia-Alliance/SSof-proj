@@ -2,10 +2,15 @@ import copy
 
 
 class Label:
-    def __init__(self, taints: dict = None):
-        # Each key is a tuple (source_name, source_line) and each value is a list of lists of tuples (sanitizer_name, sanitizer_line).
+    def __init__(self, implicit: bool, taints: dict = None):
+        # Each key is a tuple (source_name, source_line) and each value is a
+        # list of lists of tuples (sanitizer_name, sanitizer_line).
         # Each inner list corresponds to a unique flow
+        self._implicit = implicit
         self._taints = taints if taints is not None else dict()
+
+    def is_implicit(self):
+        return self._implicit
 
     def add_source(self, source: str, line: int):
         if (source, line) in self._taints:
@@ -34,6 +39,9 @@ class Label:
         self._taints = taints
 
     def __add__(self, l: "Label"):
+        if l.is_implicit() != self._implicit:
+            raise Exception
+
         # Creates a copy as to not modify the original label
         new_label = self.copy()
         l_taints = l.get_taints()
@@ -47,7 +55,7 @@ class Label:
         return other.get_taints().items() == self._taints.items()
 
     def copy(self):
-        return Label(copy.deepcopy(self._taints))
+        return Label(self._implicit, copy.deepcopy(self._taints))
 
     def __str__(self):
         return str(list(self._taints.items()))

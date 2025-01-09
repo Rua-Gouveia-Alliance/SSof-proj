@@ -82,7 +82,7 @@ def get_ast_paths(paths, currobj):
 # TODO: Assumes sources/sanitizers/sinks are simple names without ".". We can
 # try to augment it to consider these cases although it would only count as
 # bonus work
-def walk_expression(expr, policy, multilabelling, vulnerabilities):
+def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
     expr_type = expr["type"]
 
     if expr_type == "Literal":
@@ -112,11 +112,15 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
         return ml
     elif expr_type == "UnaryExpression":
         return walk_expression(
-            expr["argument"], policy, multilabelling, vulnerabilities
+            expr["argument"], policy, multilabelling, vulnerabilities, context
         )
     elif expr_type == "BinaryExpression":
-        left = walk_expression(expr["left"], policy, multilabelling, vulnerabilities)
-        right = walk_expression(expr["right"], policy, multilabelling, vulnerabilities)
+        left = walk_expression(
+            expr["left"], policy, multilabelling, vulnerabilities, context
+        )
+        right = walk_expression(
+            expr["right"], policy, multilabelling, vulnerabilities, context
+        )
         return left + right
     elif expr_type == "CallExpression":
         line = expr["loc"]["start"]["line"]
@@ -125,7 +129,7 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
         callee = expr["callee"]
 
         # CallExpressions of the form a()
-        if (callee["type"] == "Identifier"):
+        if callee["type"] == "Identifier":
             callee_name = callee["name"]
             callee_multilabel = MultiLabel(policy.get_patterns())
             callee_multilabel.add_source(callee_name, line)
@@ -133,7 +137,11 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
         else:
             callee_name = callee["property"]["name"]
             callee_multilabel = walk_expression(
-                expr["callee"]["object"], policy, multilabelling, vulnerabilities
+                expr["callee"]["object"],
+                policy,
+                multilabelling,
+                vulnerabilities,
+                context,
             )
             callee_multilabel.add_source(callee_name, line)
 
@@ -141,7 +149,7 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
         arg_multilabel = MultiLabel()
         for arg in expr["arguments"]:
             arg_multilabel += walk_expression(
-                arg, policy, multilabelling, vulnerabilities
+                arg, policy, multilabelling, vulnerabilities, context
             )
 
         # If function is a sanitizer, apply the sanitizer to the arguments
@@ -150,6 +158,7 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
 
         # If function is a sink, store the vulnerabilities that the arguments
         # might pass
+        arg_multilabel = arg_multilabel + context
         vulnerabilities.store_vulnerabilities(
             policy.get_vulnerabilities(callee_name, arg_multilabel),
             (callee_name, line),
@@ -158,18 +167,19 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
         return callee_multilabel + arg_multilabel
     elif expr_type == "MemberExpression":
         obj_multilabel = walk_expression(
-            expr["object"], policy, multilabelling, vulnerabilities
+            expr["object"], policy, multilabelling, vulnerabilities, context
         )
         prop_multilabel = walk_expression(
-            expr["property"], policy, multilabelling, vulnerabilities
+            expr["property"], policy, multilabelling, vulnerabilities, context
         )
 
         return obj_multilabel + prop_multilabel
     elif expr_type == "AssignmentExpression":
         assigned_name = get_expr_name(expr["left"])
         rhs_multilabel = walk_expression(
-            expr["right"], policy, multilabelling, vulnerabilities
+            expr["right"], policy, multilabelling, vulnerabilities, context
         )
+        rhs_multilabel = rhs_multilabel
 
         # Uncomment this if shenanigans such as "a.b().c = d" have to be
         # considered. If so, a way to speed up the program would be to skip
@@ -183,12 +193,12 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities):
 
         for sink in lhs_sinks:
             vulnerabilities.store_vulnerabilities(
-                policy.get_vulnerabilities(sink[0], rhs_multilabel), sink
+                policy.get_vulnerabilities(sink[0], rhs_multilabel + context), sink
             )
 
         # Update Multilabelling
         if assigned_name != "":
-            multilabelling.set_multilabel(assigned_name, rhs_multilabel)
+            multilabelling.set_multilabel(assigned_name, rhs_multilabel + context)
 
         # I might be missing something but the returned Multilabel might be
         # irrelevant in this case
@@ -241,53 +251,65 @@ def get_lhs_sinks(expr, policy):
         return []
 
 
-def walk_statement(stmt, policy, multilabelling, vulnerabilities):
+def walk_statement(stmt, policy, multilabelling, vulnerabilities, context):
     stmt_type = stmt["type"]
 
     if stmt_type == "Program" or stmt_type == "BlockStatement":
         for s in stmt.get("body", []):
-            multilabelling = walk_statement(s, policy, multilabelling, vulnerabilities)
+            multilabelling = walk_statement(
+                s, policy, multilabelling, vulnerabilities, context
+            )
         return multilabelling
     elif stmt_type == "ExpressionStatement":
         walk_expression(
-            stmt["expression"], policy, multilabelling, vulnerabilities
+            stmt["expression"], policy, multilabelling, vulnerabilities, context
         )
 
         return multilabelling
     elif stmt_type == "IfStatement":
-        # Cond will only be used to track implicit flows. For now it is not used
-        cond = walk_expression(stmt["test"], policy, multilabelling, vulnerabilities)
+        # Adding the condition to the analysis context
+        cond = walk_expression(
+            stmt["test"], policy, multilabelling, vulnerabilities, context
+        )
+        new_context = context + cond
 
         ml_copy = multilabelling.copy()
 
         # MultiLabelling of the "if" branch
         consequent = walk_statement(
-            stmt["consequent"], policy, multilabelling, vulnerabilities
+            stmt["consequent"], policy, multilabelling, vulnerabilities, new_context
         )
-        
+
         # Alternate is not always present
         alternate = (
-            walk_statement(stmt["alternate"], policy, ml_copy, vulnerabilities)
+            walk_statement(
+                stmt["alternate"], policy, ml_copy, vulnerabilities, new_context
+            )
             if "alternate" in stmt
             else ml_copy
         )
 
         return consequent + alternate
     elif stmt_type == "WhileStatement":
-        # Cond will only be used to track implicit flows. For now it is not used
-        cond = walk_expression(stmt["test"], policy, multilabelling, vulnerabilities)
+        # Adding the condition to the analysis context
+        cond = walk_expression(
+            stmt["test"], policy, multilabelling, vulnerabilities, context
+        )
+        new_context = context + cond
 
         res_multilabelling = multilabelling.copy()
         for i in range(3):
             multilabelling = walk_statement(
-                stmt["body"], policy, multilabelling, vulnerabilities
+                stmt["body"], policy, multilabelling, vulnerabilities, new_context
             )
+            # TODO: is this copy necessary?
             res_multilabelling += multilabelling.copy()
 
         return res_multilabelling
     else:
-        print("Unrecognized statement type: " + expr_type)
+        print("Unrecognized statement type: " + stmt_type)
         return MultiLabelling()
+
 
 def load_patterns(filename):
     with open(filename, "r") as f:
@@ -327,12 +349,13 @@ if __name__ == "__main__":
     patterns = load_patterns(patterns_file)  # load patterns
     policy = Policy(patterns)  # create policy from patterns
 
-    # create multilabelling and vulnerabilities instance
+    # create multilabelling, vulnerabilities, and context instance
     multilabelling = MultiLabelling()
     vulnerabilities = Vulnerabilities([pattern.get_name() for pattern in patterns])
+    context = MultiLabel(is_context=True)
 
     # walk through all statements in the program
-    walk_statement(ast, policy, multilabelling, vulnerabilities)
+    walk_statement(ast, policy, multilabelling, vulnerabilities, context)
 
     # get output
     vulnerabilities_json = vulnerabilities.get_json()

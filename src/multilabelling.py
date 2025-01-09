@@ -14,16 +14,16 @@ class MultiLabelling:
 
     def get_varnames(self):
         return self._var_labels.keys()
-    
+
     def get_not_initialized(self):
         return self._not_initialized
-    
+
     def set_not_initialized(self, not_initiazized: set):
         self._not_initialized = not_initiazized
 
     def add_to_not_initialized(self, value: str):
         self._not_initialized.add(value)
-    
+
     def merge_not_initialized(self, other: set):
         self._not_initialized = self._not_initialized.union(other)
 
@@ -37,7 +37,7 @@ class MultiLabelling:
         return self._var_labels.get(var_name, MultiLabel()).copy()
 
     # define Multilabel.copy
-    def set_multilabel(self, var_name: str, ml: MultiLabel, from_assignment = True):
+    def set_multilabel(self, var_name: str, ml: MultiLabel, from_assignment=True):
         self._var_labels[var_name] = ml.copy()
 
         if from_assignment:
@@ -53,7 +53,7 @@ class MultiLabelling:
 
         for var, multilabel in self._var_labels.items():
             new_multilabelling.set_multilabel(var, multilabel, False)
-        
+
         new_multilabelling.set_not_initialized(self.get_not_initialized())
 
         return new_multilabelling
@@ -78,12 +78,10 @@ class MultiLabelling:
                     var_name, other.get_multilabel(var_name), False
                 )
 
-        new_multilabelling.merge_not_initialized(
-            other.get_not_initialized()
-        )
+        new_multilabelling.merge_not_initialized(other.get_not_initialized())
 
         return new_multilabelling
-    
+
     def __str__(self):
         string = ""
         for var, ml in self._var_labels.items():

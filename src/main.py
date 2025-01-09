@@ -274,14 +274,17 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities):
 
         return consequent + alternate
     elif stmt_type == "WhileStatement":
+        # Cond will only be used to track implicit flows. For now it is not used
         cond = walk_expression(stmt["test"], policy, multilabelling, vulnerabilities)
 
-        body_multilabel = MultiLabel()
-        for _ in range(2):
-            body_multilabel += walk_statement(
+        res_multilabelling = multilabelling.copy()
+        for i in range(3):
+            multilabelling = walk_statement(
                 stmt["body"], policy, multilabelling, vulnerabilities
             )
-        return cond + body_multilabel
+            res_multilabelling += multilabelling.copy()
+
+        return res_multilabelling
     else:
         print("Unrecognized statement type: " + expr_type)
         return MultiLabelling()

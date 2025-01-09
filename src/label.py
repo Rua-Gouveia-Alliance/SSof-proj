@@ -16,7 +16,8 @@ class Label:
     def add_sanitizer(self, sanitizer: str, line: int):
         for sanitizer_flows in self._taints.values():
             for sanitizer_flow in sanitizer_flows:
-                sanitizer_flow.append((sanitizer, line))
+                if (sanitizer, line) not in sanitizer_flow:
+                    sanitizer_flow.append((sanitizer, line))
 
     def add_taint(self, source, sanitizer_flows):
         if source in self._taints:
@@ -41,6 +42,9 @@ class Label:
             new_label.add_taint(l_source, l_flows)
 
         return new_label
+
+    def __eq__(self, other):
+        return other.get_taints().items() == self._taints.items()
 
     def copy(self):
         return Label(copy.deepcopy(self._taints))

@@ -9,6 +9,9 @@ class MultiLabelling:
         # Keeps track of names that might not be initialized on at least one flow of the program
         self._not_initialized = set()
 
+    def get_var_labels(self):
+        return self._var_labels
+
     def get_varnames(self):
         return self._var_labels.keys()
     
@@ -50,6 +53,8 @@ class MultiLabelling:
 
         for var, multilabel in self._var_labels.items():
             new_multilabelling.set_multilabel(var, multilabel, False)
+        
+        new_multilabelling.set_not_initialized(self.get_not_initialized())
 
         return new_multilabelling
 
@@ -57,7 +62,7 @@ class MultiLabelling:
     def __add__(self, other):
         new_multilabelling = self.copy()
 
-        for var_name, multilabel in self._var_labels.items():
+        for var_name, multilabel in new_multilabelling.get_var_labels().items():
             if not other.is_defined(var_name):
                 new_multilabelling.add_to_not_initialized(var_name)
 
@@ -66,7 +71,7 @@ class MultiLabelling:
             )
 
         for var_name in other.get_varnames():
-            if var_name not in self._var_labels.keys():
+            if var_name not in new_multilabelling.get_varnames():
                 new_multilabelling.add_to_not_initialized(var_name)
 
                 new_multilabelling.set_multilabel(

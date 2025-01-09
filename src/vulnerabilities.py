@@ -15,7 +15,8 @@ class Vulnerabilities:
     # TODO: extract all vulnerabilities from the multilabel
     def store_vulnerabilities(self, ml: "MultiLabel", sink: tuple):
         for pattern, label in ml.get_mapping():
-            self._vulnerabilities[pattern.get_name()].append((label, sink))
+            if (label, sink) not in self._vulnerabilities[pattern.get_name()]:
+                self._vulnerabilities[pattern.get_name()].append((label, sink))
 
     def get_json(self):
         json = []

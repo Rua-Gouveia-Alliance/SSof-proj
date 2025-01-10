@@ -9,32 +9,42 @@ class Vulnerabilities:
         for name in vuln_names:
             self._vulnerabilities[name] = []
 
+    def find_entry(self, pattern, label, sink):
+        def same_sources(label1, label2):
+            return label1.get_taints().keys() == label2.get_taints().keys()
+
+        return next(
+            (
+                i
+                for i, item in enumerate(self._vulnerabilities[pattern.get_name()])
+                if same_sources(item[0], label) and item[1] == sink
+            ),
+            -1,
+        )
+
     # Assuming the multilabel was already filtered to only contain the labels
     # with sink in its pattern
     # TODO: extract all vulnerabilities from the multilabel
     def store_vulnerabilities(self, ml: "MultiLabel", sink: tuple):
         for pattern, label in ml.get_mapping():
-            if [label["explicit"], sink] in self._vulnerabilities[pattern.get_name()]:
-                index = self._vulnerabilities[pattern.get_name()].index(
-                    [label["explicit"], sink]
-                )
+            index = self.find_entry(pattern, label["explicit"], sink)
+            if index != -1:
                 self._vulnerabilities[pattern.get_name()][index][0] += label["explicit"]
             else:
                 self._vulnerabilities[pattern.get_name()].append(
                     [label["explicit"].copy(), sink]
                 )
 
-            if [label["implicit"], sink] in self._vulnerabilities[
-                pattern.get_name()
-            ] and pattern.is_implicit():
-                index = self._vulnerabilities[pattern.get_name()].index(
-                    [label["implicit"], sink]
-                )
-                self._vulnerabilities[pattern.get_name()][index][0] += label["implicit"]
-            elif pattern.is_implicit():
-                self._vulnerabilities[pattern.get_name()].append(
-                    [label["implicit"].copy(), sink]
-                )
+            if pattern.is_implicit():
+                index = self.find_entry(pattern, label["implicit"], sink)
+                if index != -1:
+                    self._vulnerabilities[pattern.get_name()][index][0] += label[
+                        "implicit"
+                    ]
+                else:
+                    self._vulnerabilities[pattern.get_name()].append(
+                        [label["implicit"].copy(), sink]
+                    )
 
     def get_json(self):
         json = []

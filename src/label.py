@@ -55,7 +55,7 @@ class Label:
         return new_label
 
     def __eq__(self, other):
-        return other.get_taints().keys() == self._taints.keys()
+        return other.get_taints() == self._taints
 
     def copy(self):
         return Label(self._implicit, copy.deepcopy(self._taints))

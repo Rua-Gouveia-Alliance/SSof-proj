@@ -100,6 +100,13 @@ class MultiLabel:
 
         return new_ml
 
+    def __eq__(self, other):
+        return (
+            isinstance(other, MultiLabel)
+            and self._is_context == other._is_context
+            and self._labels == other._labels
+        )
+
     def __str__(self):
         string = ""
 

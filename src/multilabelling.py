@@ -36,7 +36,6 @@ class MultiLabelling:
     def get_multilabel(self, var_name: str):
         return self._var_labels.get(var_name, MultiLabel()).copy()
 
-    # define Multilabel.copy
     def set_multilabel(self, var_name: str, ml: MultiLabel, from_assignment=True):
         self._var_labels[var_name] = ml.copy()
 
@@ -82,13 +81,16 @@ class MultiLabelling:
 
         return new_multilabelling
 
+    def __eq__(self, other):
+        return (
+            isinstance(other, MultiLabelling)
+            and self._var_labels == other._var_labels
+            and self._not_initialized == other._not_initialized
+        )
+
     def __str__(self):
         string = ""
         for var, ml in self._var_labels.items():
             string += var + " " + str(ml)
         string += str(self._not_initialized) + "\n"
         return string
-
-
-if __name__ == "__main__":
-    print("TODO: Needs testing")

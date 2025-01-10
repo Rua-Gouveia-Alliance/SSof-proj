@@ -159,7 +159,7 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
 
         # If function is a sink, store the vulnerabilities that the arguments
         # might pass
-        arg_multilabel = arg_multilabel + context
+        arg_multilabel += context
         vulnerabilities.store_vulnerabilities(
             policy.get_vulnerabilities(callee_name, arg_multilabel),
             (callee_name, line),
@@ -180,7 +180,6 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
         rhs_multilabel = walk_expression(
             expr["right"], policy, multilabelling, vulnerabilities, context
         )
-        rhs_multilabel = rhs_multilabel
 
         # Uncomment this if shenanigans such as "a.b().c = d" have to be
         # considered. If so, a way to speed up the program would be to skip
@@ -191,15 +190,16 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
         # of the lhs.
         # walk_expression(expr["left"], policy, multilabelling, vulnerabilities)
         lhs_sinks = get_lhs_sinks(expr["left"], policy)
+        rhs_multilabel += context
 
         for sink in lhs_sinks:
             vulnerabilities.store_vulnerabilities(
-                policy.get_vulnerabilities(sink[0], rhs_multilabel + context), sink
+                policy.get_vulnerabilities(sink[0], rhs_multilabel), sink
             )
 
         # Update Multilabelling
         if assigned_name != "":
-            multilabelling.set_multilabel(assigned_name, rhs_multilabel + context)
+            multilabelling.set_multilabel(assigned_name, rhs_multilabel)
 
         # I might be missing something but the returned Multilabel might be
         # irrelevant in this case
@@ -273,7 +273,6 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities, context):
             stmt["test"], policy, multilabelling, vulnerabilities, context
         )
         new_context = context + cond
-
         ml_copy = multilabelling.copy()
 
         # MultiLabelling of the "if" branch
@@ -303,8 +302,7 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities, context):
             multilabelling = walk_statement(
                 stmt["body"], policy, multilabelling, vulnerabilities, new_context
             )
-            # TODO: is this copy necessary?
-            res_multilabelling += multilabelling.copy()
+            res_multilabelling += multilabelling
 
         return res_multilabelling
     else:

@@ -36,8 +36,7 @@ class MultiLabel:
         return labels
 
     def set_label_pair(self, pattern: Pattern, labels: dict):
-        if pattern not in self._labels:
-            self._labels[pattern] = dict()
+        self._labels[pattern] = dict()
         if self._is_context:
             # All labels stored in the context are implicit
             explicit = labels["explicit"].copy()

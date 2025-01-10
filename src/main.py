@@ -155,6 +155,7 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
         # If function is a sanitizer, apply the sanitizer to the arguments
         # multilabel
         arg_multilabel.add_sanitizer(callee_name, line)
+        context.add_sanitizer(callee_name, line)
 
         # If function is a sink, store the vulnerabilities that the arguments
         # might pass

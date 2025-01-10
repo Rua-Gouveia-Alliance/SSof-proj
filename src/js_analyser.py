@@ -11,7 +11,7 @@ from vulnerabilities import Vulnerabilities
 
 
 def usage():
-    print("Usage: main <program_file> <patterns_file>")
+    print("Usage: python js_analyser.py <program_file> <patterns_file>")
 
 
 def print_ast(currobj, indent):

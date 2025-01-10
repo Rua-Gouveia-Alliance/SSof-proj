@@ -1,5 +1,4 @@
-from multilabel import MultiLabel
-
+from src.multilabel import MultiLabel
 
 class MultiLabelling:
     # Dictionary with strings as keys (representing variables) and multilabel as values

@@ -1,6 +1,5 @@
-from pattern import Pattern
-from multilabel import MultiLabel
-
+from src.pattern import Pattern
+from src.multilabel import MultiLabel
 
 class Policy:
     def __init__(self, patterns: list = None):

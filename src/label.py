@@ -1,6 +1,5 @@
 import copy
 
-
 class Label:
     def __init__(self, implicit: bool, taints: dict = None):
         # Each key is a tuple (source_name, source_line) and each value is a

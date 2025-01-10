@@ -1,5 +1,5 @@
-from pattern import Pattern
-from label import Label
+from src.pattern import Pattern
+from src.label import Label
 
 
 # TODO: Need to check if these multilabels should be independent from eachother due to __add__

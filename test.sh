@@ -11,7 +11,7 @@ for DIR in $TESTDIRS; do
         PATTERNS="$TESTNAME".patterns.json
         OUT="$TESTNAME".output.json
         MYOUT=./output/$(basename "$TESTNAME").output.json
-        python src/js_analyser.py "$TEST" "$PATTERNS"
+        python ./js_analyser.py "$TEST" "$PATTERNS"
         python validate.py -o "$MYOUT" -t "$OUT"
     done
 done

@@ -155,11 +155,12 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
         # If function is a sanitizer, apply the sanitizer to the arguments
         # multilabel
         arg_multilabel.add_sanitizer(callee_name, line)
-        context.add_sanitizer(callee_name, line)
+        new_context = context.copy()
+        new_context.add_sanitizer(callee_name, line)
 
         # If function is a sink, store the vulnerabilities that the arguments
         # might pass
-        arg_multilabel += context
+        arg_multilabel += new_context
         vulnerabilities.store_vulnerabilities(
             policy.get_vulnerabilities(callee_name, arg_multilabel),
             (callee_name, line),
@@ -300,8 +301,8 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities, context):
         prev_multilabelling = None
         cycle_multilabelling = multilabelling.copy()
         res_multilabelling = multilabelling.copy()
-        while prev_multilabelling != cycle_multilabelling:
-            prev_multilabelling = cycle_multilabelling.copy()
+        while prev_multilabelling != res_multilabelling:
+            prev_multilabelling = res_multilabelling.copy()
             cycle_multilabelling = walk_statement(
                 stmt["body"], policy, cycle_multilabelling, vulnerabilities, new_context
             )

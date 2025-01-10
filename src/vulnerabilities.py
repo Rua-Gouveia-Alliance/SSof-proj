@@ -14,17 +14,26 @@ class Vulnerabilities:
     # TODO: extract all vulnerabilities from the multilabel
     def store_vulnerabilities(self, ml: "MultiLabel", sink: tuple):
         for pattern, label in ml.get_mapping():
-            if (label["explicit"], sink) not in self._vulnerabilities[
-                pattern.get_name()
-            ]:
-                self._vulnerabilities[pattern.get_name()].append(
-                    (label["explicit"], sink)
+            if [label["explicit"], sink] in self._vulnerabilities[pattern.get_name()]:
+                index = self._vulnerabilities[pattern.get_name()].index(
+                    [label["explicit"], sink]
                 )
-            if (label["implicit"], sink) not in self._vulnerabilities[
+                self._vulnerabilities[pattern.get_name()][index][0] += label["explicit"]
+            else:
+                self._vulnerabilities[pattern.get_name()].append(
+                    [label["explicit"].copy(), sink]
+                )
+
+            if [label["implicit"], sink] in self._vulnerabilities[
                 pattern.get_name()
             ] and pattern.is_implicit():
+                index = self._vulnerabilities[pattern.get_name()].index(
+                    [label["implicit"], sink]
+                )
+                self._vulnerabilities[pattern.get_name()][index][0] += label["implicit"]
+            elif pattern.is_implicit():
                 self._vulnerabilities[pattern.get_name()].append(
-                    (label["implicit"], sink)
+                    [label["implicit"].copy(), sink]
                 )
 
     def get_json(self):

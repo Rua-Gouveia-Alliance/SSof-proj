@@ -39,9 +39,6 @@ class Label:
         self._taints = taints
 
     def __add__(self, l: "Label"):
-        if l.is_implicit() != self._implicit:
-            raise Exception
-
         # Creates a copy as to not modify the original label
         new_label = self.copy()
         l_taints = l.get_taints()
@@ -49,10 +46,16 @@ class Label:
         for l_source, l_flows in l_taints.items():
             new_label.add_taint(l_source, l_flows)
 
+        new_label._implicit = False
+        if (self._implicit and len(self._taints.keys()) > 0) or (
+            l.is_implicit() and len(l.get_taints().keys()) > 0
+        ):
+            new_label._implicit = True
+
         return new_label
 
     def __eq__(self, other):
-        return other.get_taints().items() == self._taints.items()
+        return other.get_taints().keys() == self._taints.keys()
 
     def copy(self):
         return Label(self._implicit, copy.deepcopy(self._taints))

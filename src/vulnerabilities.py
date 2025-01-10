@@ -1,5 +1,4 @@
-from multilabel import MultiLabel
-
+from src.multilabel import MultiLabel
 
 class Vulnerabilities:
     # Vulnerabilities is a dictionary where vulnerabilits' names are the keys

@@ -3,11 +3,11 @@ import esprima
 import json
 import os
 from copy import deepcopy
-from multilabel import MultiLabel
-from multilabelling import MultiLabelling
-from pattern import Pattern
-from policy import Policy
-from vulnerabilities import Vulnerabilities
+from src.multilabel import MultiLabel
+from src.multilabelling import MultiLabelling
+from src.pattern import Pattern
+from src.policy import Policy
+from src.vulnerabilities import Vulnerabilities
 
 
 def usage():

@@ -297,12 +297,15 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities, context):
         )
         new_context = context + cond
 
+        prev_multilabelling = None
+        cycle_multilabelling = multilabelling.copy()
         res_multilabelling = multilabelling.copy()
-        for i in range(3):
-            multilabelling = walk_statement(
-                stmt["body"], policy, multilabelling, vulnerabilities, new_context
+        while prev_multilabelling != cycle_multilabelling:
+            prev_multilabelling = cycle_multilabelling.copy()
+            cycle_multilabelling = walk_statement(
+                stmt["body"], policy, cycle_multilabelling, vulnerabilities, new_context
             )
-            res_multilabelling += multilabelling
+            res_multilabelling += cycle_multilabelling
 
         return res_multilabelling
     else:

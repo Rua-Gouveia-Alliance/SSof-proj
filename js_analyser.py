@@ -292,16 +292,15 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities, context):
 
         return consequent + alternate
     elif stmt_type == "WhileStatement":
-        # Adding the condition to the analysis context
-        cond = walk_expression(
-            stmt["test"], policy, multilabelling, vulnerabilities, context
-        )
-        new_context = context + cond
-
         prev_multilabelling = None
         cycle_multilabelling = multilabelling.copy()
         res_multilabelling = multilabelling.copy()
         while prev_multilabelling != res_multilabelling:
+            cond = walk_expression(
+               stmt["test"], policy, cycle_multilabelling, vulnerabilities, context
+            )
+            new_context = context + cond
+
             prev_multilabelling = res_multilabelling.copy()
             cycle_multilabelling = walk_statement(
                 stmt["body"], policy, cycle_multilabelling, vulnerabilities, new_context

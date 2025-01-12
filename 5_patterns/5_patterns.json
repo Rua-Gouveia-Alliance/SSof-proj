@@ -1,0 +1,84 @@
+[
+    {
+        "vulnerability": "XSS",
+        "sources": [
+            "URL",
+            "referrer",
+            "cookie"
+        ],
+        "sanitizers": [
+            "sanitize"
+        ],
+        "sinks": [
+            "innerHTML",
+            "write",
+            "outerHTML",
+            "eval"
+        ],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "SQL Injection",
+        "sources": [
+            "body",
+            "query",
+            "params"
+        ],
+        "sanitizers": [
+            "escape"
+        ],
+        "sinks": [
+            "query",
+            "execute"
+        ],
+        "implicit": "yes"
+    },
+    {
+        "vulnerability": "CSRF",
+        "sources": [
+            "body",
+            "cookies",
+            "cookie"
+        ],
+        "sanitizers": [
+            "validate"
+        ],
+        "sinks": [
+            "send",
+            "redirect",
+            "query"
+        ],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "Open Redirect",
+        "sources": [
+            "redirect",
+            "href"
+        ],
+        "sanitizers": [
+            "URLSearchParams",
+            "validURL"
+        ],
+        "sinks": [
+            "location"
+        ],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "Insecure File Upload",
+        "sources": [
+            "files",
+            "userInput"
+        ],
+        "sanitizers": [
+            "validate",
+            "lookup"
+        ],
+        "sinks": [
+            "writeFile",
+            "createWriteStream"
+        ],
+        "implicit": "no"
+    }
+]

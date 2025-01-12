@@ -33,52 +33,6 @@ def print_ast(currobj, indent):
             print_ast(val, indent + 1)
 
 
-# Not working since this function was developed for the Python AST
-# Use this as a stepping stone to develop walk_expression and walk_statement
-def get_ast_paths(paths, currobj):
-    currtype = currobj["ast_type"]
-
-    # This can be augmented to also print every constant and variable
-    if currtype == "Module":
-        for obj in currobj["body"]:
-            paths = get_ast_paths(paths, obj)
-        return paths
-    elif currtype == "Assign":
-        for path in paths:
-            path.append((currtype, currobj.get("lineno", -1)))
-        return paths
-    elif currtype == "If":
-        paths2 = deepcopy(paths)
-
-        for path in paths:
-            path.append((currtype, currobj.get("lineno", -1)))
-
-        # TODO: Not completely correct as "lineno" gets number of line of if clause
-        for path in paths2:
-            path.append((currtype, currobj.get("lineno", -1)))
-
-        for obj in currobj["body"]:
-            paths = get_ast_paths(paths, obj)
-
-        for obj in currobj["orelse"]:
-            paths2 = get_ast_paths(paths2, obj)
-
-        paths.extend(paths2)
-        return paths
-    elif currtype == "While":
-        max_depth = 2
-        currpaths = deepcopy(paths)
-        for i in range(1, max_depth + 1):
-            thiscyclepaths = deepcopy(currpaths)
-            for j in range(i):
-                for path in thiscyclepaths:
-                    path.append((currtype, currobj.get("lineno", -1)))
-                for obj in currobj["body"]:
-                    thiscyclepaths = get_ast_paths(thiscyclepaths, obj)
-            paths.extend(thiscyclepaths)
-        return paths
-
-
 # TODO: Assumes sources/sanitizers/sinks are simple names without ".". We can
 # try to augment it to consider these cases although it would only count as
 # bonus work

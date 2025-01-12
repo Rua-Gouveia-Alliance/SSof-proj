@@ -21,7 +21,6 @@
         "vulnerability": "SQL Injection",
         "sources": [
             "body",
-            "query",
             "params"
         ],
         "sanitizers": [

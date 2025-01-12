@@ -42,6 +42,11 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
     if expr_type == "Literal":
         # A literal has the highest possible integrity for all patterns
         return MultiLabel()
+    elif expr_type == "TemplateLiteral":
+        ml = MultiLabel()
+        for e in expr["expressions"]:
+            ml += walk_expression(e, policy, multilabelling, vulnerabilities, context)
+        return ml
     elif expr_type == "Identifier":
         var_name = expr["name"]
         line = expr["loc"]["start"]["line"]

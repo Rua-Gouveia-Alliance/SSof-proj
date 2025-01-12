@@ -1,1 +1,170 @@
-[]
+[
+    {
+        "vulnerability": "SQL Injection_1",
+        "source": [
+            "req",
+            1
+        ],
+        "sink": [
+            "query",
+            3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "SQL Injection_2",
+        "source": [
+            "query",
+            1
+        ],
+        "sink": [
+            "query",
+            3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "SQL Injection_3",
+        "source": [
+            "username",
+            1
+        ],
+        "sink": [
+            "query",
+            3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "SQL Injection_4",
+        "source": [
+            "req",
+            1
+        ],
+        "sink": [
+            "query",
+            4
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "SQL Injection_5",
+        "source": [
+            "query",
+            1
+        ],
+        "sink": [
+            "query",
+            4
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "SQL Injection_6",
+        "source": [
+            "username",
+            1
+        ],
+        "sink": [
+            "query",
+            4
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "CSRF_1",
+        "source": [
+            "req",
+            1
+        ],
+        "sink": [
+            "query",
+            3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "CSRF_2",
+        "source": [
+            "query",
+            1
+        ],
+        "sink": [
+            "query",
+            3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "CSRF_3",
+        "source": [
+            "username",
+            1
+        ],
+        "sink": [
+            "query",
+            3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "CSRF_4",
+        "source": [
+            "req",
+            1
+        ],
+        "sink": [
+            "query",
+            4
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "CSRF_5",
+        "source": [
+            "query",
+            1
+        ],
+        "sink": [
+            "query",
+            4
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "CSRF_6",
+        "source": [
+            "username",
+            1
+        ],
+        "sink": [
+            "query",
+            4
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    }
+]

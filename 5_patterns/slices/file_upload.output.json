@@ -1,0 +1,44 @@
+[
+    {
+        "vulnerability": "Insecure File Upload_1",
+        "source": [
+            "uploadedFile",
+            3
+        ],
+        "sink": [
+            "writeFile",
+            3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "Insecure File Upload_2",
+        "source": [
+            "name",
+            3
+        ],
+        "sink": [
+            "writeFile",
+            3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "Insecure File Upload_3",
+        "source": [
+            "data",
+            3
+        ],
+        "sink": [
+            "writeFile",
+            3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    }
+]

@@ -1,0 +1,16 @@
+[
+    {
+        "vulnerability": "XSS_1",
+        "source": [
+            "sanitizedReferrer",
+            3
+        ],
+        "sink": [
+            "innerHTML",
+            3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    }
+]

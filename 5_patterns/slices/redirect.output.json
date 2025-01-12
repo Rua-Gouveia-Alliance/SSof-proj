@@ -1,0 +1,16 @@
+[
+    {
+        "vulnerability": "Open Redirect_1",
+        "source": [
+            "redirectUrl",
+            2
+        ],
+        "sink": [
+            "location",
+            2
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    }
+]

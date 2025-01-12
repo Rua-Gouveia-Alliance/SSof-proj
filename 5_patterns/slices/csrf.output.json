@@ -1,0 +1,30 @@
+[
+    {
+        "vulnerability": "SQL Injection_1",
+        "source": [
+            "userId",
+            3
+        ],
+        "sink": [
+            "query",
+            3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "CSRF_1",
+        "source": [
+            "userId",
+            3
+        ],
+        "sink": [
+            "query",
+            3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    }
+]

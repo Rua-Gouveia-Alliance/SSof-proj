@@ -297,7 +297,7 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities, context):
         res_multilabelling = multilabelling.copy()
         while prev_multilabelling != res_multilabelling:
             cond = walk_expression(
-               stmt["test"], policy, cycle_multilabelling, vulnerabilities, context
+                stmt["test"], policy, cycle_multilabelling, vulnerabilities, context
             )
             new_context = context + cond
 
@@ -308,9 +308,49 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities, context):
             res_multilabelling += cycle_multilabelling
 
         return res_multilabelling
+    elif stmt_type == "SwitchStatement":
+        # Adding the switched expression to the analysis context
+        cond = walk_expression(
+            stmt["discriminant"], policy, multilabelling, vulnerabilities, context
+        )
+        new_context = context + cond
+
+        # Evaluate each case independently
+        res_multilabelling = multilabelling.copy()
+        for caseStmt in stmt["cases"]:
+            res_multilabelling += walk_statement(
+                caseStmt, policy, multilabelling.copy(), vulnerabilities, new_context
+            )
+        return res_multilabelling
+    elif stmt_type == "SwitchCase":
+        # "test" is not present in the "default" case
+        new_context = context.copy()
+        if "test" in stmt:
+            cond = walk_expression(
+                stmt["test"], policy, multilabelling, vulnerabilities, context
+            )
+            new_context += cond
+
+        # For some reason the consequent in switch cases is not a block
+        # statement, just a list of statements. "Fake" the block statement.
+        blockStmt = {
+            "type": "BlockStatement",
+            "body": stmt["consequent"],
+            "loc": {
+                "start": stmt["consequent"][0]["loc"]["start"],
+                "end": stmt["consequent"][-1]["loc"]["end"],
+            },
+        }
+        consequent = walk_statement(
+            blockStmt, policy, multilabelling, vulnerabilities, new_context
+        )
+
+        return consequent
+    elif stmt_type == "BreakStatement":
+        return multilabelling.copy()  # Do nothing
     else:
         print("Unrecognized statement type: " + stmt_type)
-        return MultiLabelling()
+        return multilabelling.copy()  # Do nothing
 
 
 def load_patterns(filename):

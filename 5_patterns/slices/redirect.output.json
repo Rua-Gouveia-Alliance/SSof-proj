@@ -2,8 +2,36 @@
     {
         "vulnerability": "Open Redirect_1",
         "source": [
-            "redirectUrl",
+            "req",
+            1
+        ],
+        "sink": [
+            "location",
             2
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "Open Redirect_2",
+        "source": [
+            "query",
+            1
+        ],
+        "sink": [
+            "location",
+            2
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "Open Redirect_3",
+        "source": [
+            "redirect",
+            1
         ],
         "sink": [
             "location",

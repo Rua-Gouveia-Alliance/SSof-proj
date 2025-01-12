@@ -1,2 +1,2 @@
-let redirectUrl = req.query.redirect;
+redirectUrl = req.query.redirect;
 window.location = redirectUrl;

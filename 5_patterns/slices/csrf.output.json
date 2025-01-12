@@ -2,8 +2,36 @@
     {
         "vulnerability": "SQL Injection_1",
         "source": [
-            "userId",
+            "req",
+            1
+        ],
+        "sink": [
+            "query",
             3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "SQL Injection_2",
+        "source": [
+            "body",
+            1
+        ],
+        "sink": [
+            "query",
+            3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "SQL Injection_3",
+        "source": [
+            "userId",
+            1
         ],
         "sink": [
             "query",
@@ -16,8 +44,36 @@
     {
         "vulnerability": "CSRF_1",
         "source": [
-            "userId",
+            "req",
+            1
+        ],
+        "sink": [
+            "query",
             3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "CSRF_2",
+        "source": [
+            "body",
+            1
+        ],
+        "sink": [
+            "query",
+            3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "CSRF_3",
+        "source": [
+            "userId",
+            1
         ],
         "sink": [
             "query",

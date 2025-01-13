@@ -10,3 +10,4 @@ switch (c) {
 e(d,"hello");
 
 // switch cases can encode implicit flows
+// Note: This is exactly the same as test 7-conds-implicit, but with a switch case

@@ -137,6 +137,11 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
         return obj_multilabel + prop_multilabel
     elif expr_type == "AssignmentExpression":
         assigned_name = get_expr_name(expr["left"])
+
+        lhs_multilabel = walk_expression(
+            expr["left"], policy, multilabelling, vulnerabilities, context
+        )
+
         rhs_multilabel = walk_expression(
             expr["right"], policy, multilabelling, vulnerabilities, context
         )
@@ -161,13 +166,7 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
         if assigned_name != "":
             multilabelling.set_multilabel(assigned_name, rhs_multilabel)
 
-        # If we have c = (a = b), we want c to have the multilabel of b with a
-        # added as source
-        line = expr["loc"]["start"]["line"]
-        res_multilabel = rhs_multilabel.copy()
-        res_multilabel.add_source(assigned_name, line)
-
-        return res_multilabel
+        return lhs_multilabel + res_multilabel
     else:
         print("Unrecognized expression type: " + expr_type)
         return MultiLabel()
@@ -339,7 +338,7 @@ def extract_ast(filename):
         program = f.read()
 
     ast_dict = esprima.parseScript(program, loc=True).toDict()
-    # print(json.dumps(ast_dict, indent=2))
+    print(json.dumps(ast_dict, indent=2))
     return ast_dict
 
 

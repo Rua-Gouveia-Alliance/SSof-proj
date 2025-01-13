@@ -1,68 +1,89 @@
 [
     {
-        "vulnerability": "Insecure File Upload_1",
+        "vulnerability": "A_1",
         "source": [
-            "req",
+            "a",
+            2
+        ],
+        "sink": [
+            "e",
+            3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "A_2",
+        "source": [
+            "d",
+            3
+        ],
+        "sink": [
+            "e",
+            3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "A_3",
+        "source": [
+            "a",
+            3
+        ],
+        "sink": [
+            "e",
+            3
+        ],
+        "unsanitized_flows": "yes",
+        "sanitized_flows": [],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "B_1",
+        "source": [
+            "b",
             1
         ],
         "sink": [
-            "writeFile",
-            3
+            "a",
+            1
         ],
         "unsanitized_flows": "yes",
         "sanitized_flows": [],
         "implicit": "no"
     },
     {
-        "vulnerability": "Insecure File Upload_2",
+        "vulnerability": "B_2",
         "source": [
-            "files",
+            "b",
             1
         ],
         "sink": [
-            "writeFile",
+            "e",
             3
         ],
         "unsanitized_flows": "yes",
-        "sanitized_flows": [],
+        "sanitized_flows": [
+            [
+                [
+                    "s",
+                    2
+                ]
+            ]
+        ],
         "implicit": "no"
     },
     {
-        "vulnerability": "Insecure File Upload_3",
+        "vulnerability": "B_3",
         "source": [
-            "file",
-            1
-        ],
-        "sink": [
-            "writeFile",
-            3
-        ],
-        "unsanitized_flows": "yes",
-        "sanitized_flows": [],
-        "implicit": "no"
-    },
-    {
-        "vulnerability": "Insecure File Upload_4",
-        "source": [
-            "name",
+            "d",
             3
         ],
         "sink": [
-            "writeFile",
-            3
-        ],
-        "unsanitized_flows": "yes",
-        "sanitized_flows": [],
-        "implicit": "no"
-    },
-    {
-        "vulnerability": "Insecure File Upload_5",
-        "source": [
-            "data",
-            3
-        ],
-        "sink": [
-            "writeFile",
+            "e",
             3
         ],
         "unsanitized_flows": "yes",

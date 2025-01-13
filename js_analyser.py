@@ -2,7 +2,6 @@ import sys
 import esprima
 import json
 import os
-from copy import deepcopy
 from src.multilabel import MultiLabel
 from src.multilabelling import MultiLabelling
 from src.pattern import Pattern
@@ -156,6 +155,22 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
             multilabelling.set_multilabel(assigned_name, rhs_multilabel)
 
         return lhs_multilabel + rhs_multilabel
+    elif expr_type == "ConditionalExpression":
+        # Adding the condition to the analysis context
+        cond = walk_expression(
+            expr["test"], policy, multilabelling, vulnerabilities, context
+        )
+        new_context = context + cond
+        ml_copy = multilabelling.copy()
+
+        consequent = walk_expression(
+            expr["consequent"], policy, multilabelling, vulnerabilities, new_context
+        )
+        alternate = walk_expression(
+            expr["alternate"], policy, ml_copy, vulnerabilities, new_context
+        )
+
+        return new_context + consequent + alternate
     else:
         print("Unrecognized expression type: " + expr_type)
         return MultiLabel(policy.get_patterns())
@@ -175,6 +190,7 @@ def get_expr_name(expr):
     else:
         print("Unrecognized expression type: " + expr_type)
         return ""
+
 
 def get_lhs_sinks(expr, policy):
     expr_type = expr["type"]
@@ -307,15 +323,21 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities, context):
         return multilabelling  # Do nothing
     elif stmt_type == "ForStatement":
         if "init" in stmt:
-            walk_expression(stmt["init"], policy, multilabelling, vulnerabilities, context)
+            walk_expression(
+                stmt["init"], policy, multilabelling, vulnerabilities, context
+            )
 
         prev_multilabelling = None
         cycle_multilabelling = multilabelling.copy()
         res_multilabelling = multilabelling.copy()
         while prev_multilabelling != res_multilabelling:
-            cond = walk_expression(
-                stmt["test"], policy, cycle_multilabelling, vulnerabilities, context
-            ) if "test" in stmt else MultiLabel(policy.get_patterns())
+            cond = (
+                walk_expression(
+                    stmt["test"], policy, cycle_multilabelling, vulnerabilities, context
+                )
+                if "test" in stmt
+                else MultiLabel(policy.get_patterns())
+            )
 
             new_context = context + cond
 
@@ -325,7 +347,13 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities, context):
             )
 
             if "update" in stmt:
-                walk_expression(stmt["update"], policy, cycle_multilabelling, vulnerabilities, new_context.copy())
+                walk_expression(
+                    stmt["update"],
+                    policy,
+                    cycle_multilabelling,
+                    vulnerabilities,
+                    new_context.copy(),
+                )
             res_multilabelling += cycle_multilabelling
 
         return res_multilabelling

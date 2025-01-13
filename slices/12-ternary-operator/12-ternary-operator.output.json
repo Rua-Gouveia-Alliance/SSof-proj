@@ -1,44 +1,44 @@
 [
     {
-        "vulnerability": "Open Redirect_1",
+        "vulnerability": "A_1",
         "source": [
-            "req",
-            1
+            "c",
+            3
         ],
         "sink": [
-            "location",
-            2
+            "e",
+            4
         ],
         "unsanitized_flows": "yes",
         "sanitized_flows": [],
-        "implicit": "no"
+        "implicit": "yes"
     },
     {
-        "vulnerability": "Open Redirect_2",
+        "vulnerability": "A_2",
         "source": [
-            "query",
+            "boo",
             1
         ],
         "sink": [
-            "location",
-            2
+            "e",
+            4
         ],
         "unsanitized_flows": "yes",
         "sanitized_flows": [],
-        "implicit": "no"
+        "implicit": "yes"
     },
     {
-        "vulnerability": "Open Redirect_3",
+        "vulnerability": "A_3",
         "source": [
-            "redirect",
+            "b",
             1
         ],
         "sink": [
-            "location",
-            2
+            "e",
+            4
         ],
         "unsanitized_flows": "yes",
         "sanitized_flows": [],
-        "implicit": "no"
+        "implicit": "yes"
     }
 ]

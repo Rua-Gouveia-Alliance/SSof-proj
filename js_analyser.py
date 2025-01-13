@@ -136,6 +136,11 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
         return obj_multilabel + prop_multilabel
     elif expr_type == "AssignmentExpression":
         assigned_name = get_expr_name(expr["left"])
+
+        lhs_multilabel = walk_expression(
+            expr["left"], policy, multilabelling, vulnerabilities, context
+        )
+
         rhs_multilabel = walk_expression(
             expr["right"], policy, multilabelling, vulnerabilities, context
         )
@@ -160,13 +165,7 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
         if assigned_name != "":
             multilabelling.set_multilabel(assigned_name, rhs_multilabel)
 
-        # If we have c = (a = b), we want c to have the multilabel of b with a
-        # added as source
-        line = expr["loc"]["start"]["line"]
-        res_multilabel = rhs_multilabel.copy()
-        res_multilabel.add_source(assigned_name, line)
-
-        return res_multilabel
+        return lhs_multilabel + rhs_multilabel
     else:
         print("Unrecognized expression type: " + expr_type)
         return MultiLabel()
@@ -181,19 +180,12 @@ def get_expr_name(expr):
         if expr["computed"]:
             return get_expr_name(expr["object"])
         return get_expr_name(expr["property"])
+    elif expr_type == "CallExpression":
+        return get_expr_name(expr["callee"])
     else:
         print("Unrecognized expression type: " + expr_type)
         return ""
 
-
-# In this function I am assuming that the left hand side of an assignment is
-# either a single Identifier or a MemberExpression such as "a.b.c ..." or
-# "a.b['test']". I am not considering shenanigans such as "a.b().c = d". If
-# these have to be considered for some reason, one solution is to call
-# walk_expression and augment the Json nodes to store information if a certain
-# name is a sink or not. The higher level node will get that information after
-# visiting the child and augment it to its parent and so on. The
-# AssignmentExpression, in the end, will have a list of sinks of the lhs
 def get_lhs_sinks(expr, policy):
     expr_type = expr["type"]
 
@@ -210,6 +202,8 @@ def get_lhs_sinks(expr, policy):
         return get_lhs_sinks(expr["object"], policy) + get_lhs_sinks(
             expr["property"], policy
         )
+    elif expr_type == "CallExpression":
+        return get_lhs_sinks(expr["callee"], policy)
     else:
         print("Unrecognized left hand side expression type: " + expr_type)
         return []
@@ -321,6 +315,30 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities, context):
         return consequent
     elif stmt_type == "BreakStatement":
         return multilabelling  # Do nothing
+    elif stmt_type == "ForStatement":
+        if "init" in stmt:
+            walk_expression(stmt["init"], policy, multilabelling, vulnerabilities, context)
+
+        prev_multilabelling = None
+        cycle_multilabelling = multilabelling.copy()
+        res_multilabelling = multilabelling.copy()
+        while prev_multilabelling != res_multilabelling:
+            cond = walk_expression(
+                stmt["test"], policy, cycle_multilabelling, vulnerabilities, context
+            ) if "test" in stmt else MultiLabel()
+
+            new_context = context + cond
+
+            prev_multilabelling = res_multilabelling.copy()
+            cycle_multilabelling = walk_statement(
+                stmt["body"], policy, cycle_multilabelling, vulnerabilities, new_context
+            )
+
+            if "update" in stmt:
+                walk_expression(stmt["update"], policy, cycle_multilabelling, vulnerabilities, new_context)
+            res_multilabelling += cycle_multilabelling
+
+        return res_multilabelling
     else:
         print("Unrecognized statement type: " + stmt_type)
         return multilabelling  # Do nothing

@@ -204,7 +204,7 @@ def get_lhs_sinks(expr, policy):
             expr["property"], policy
         )
     elif expr_type == "CallExpression":
-        return get_lhs_sinks(expr["callee"])
+        return get_lhs_sinks(expr["callee"], policy)
     else:
         print("Unrecognized left hand side expression type: " + expr_type)
         return []
@@ -358,6 +358,8 @@ if __name__ == "__main__":
     ast = extract_ast(js_file)  # load ast
     patterns = load_patterns(patterns_file)  # load patterns
     policy = Policy(patterns)  # create policy from patterns
+    print(get_lhs_sinks(ast["body"][0]["expression"]["left"], policy))
+    exit(0)
 
     # create multilabelling, vulnerabilities, and context instance
     multilabelling = MultiLabelling()

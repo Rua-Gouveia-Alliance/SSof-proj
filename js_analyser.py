@@ -181,19 +181,12 @@ def get_expr_name(expr):
         if expr["computed"]:
             return get_expr_name(expr["object"])
         return get_expr_name(expr["property"])
+    elif expr_type == "CallExpression":
+        return get_expr_name(expr["callee"])
     else:
         print("Unrecognized expression type: " + expr_type)
         return ""
 
-
-# In this function I am assuming that the left hand side of an assignment is
-# either a single Identifier or a MemberExpression such as "a.b.c ..." or
-# "a.b['test']". I am not considering shenanigans such as "a.b().c = d". If
-# these have to be considered for some reason, one solution is to call
-# walk_expression and augment the Json nodes to store information if a certain
-# name is a sink or not. The higher level node will get that information after
-# visiting the child and augment it to its parent and so on. The
-# AssignmentExpression, in the end, will have a list of sinks of the lhs
 def get_lhs_sinks(expr, policy):
     expr_type = expr["type"]
 
@@ -210,6 +203,8 @@ def get_lhs_sinks(expr, policy):
         return get_lhs_sinks(expr["object"], policy) + get_lhs_sinks(
             expr["property"], policy
         )
+    elif expr_type == "CallExpression":
+        return get_lhs_sinks(expr["callee"])
     else:
         print("Unrecognized left hand side expression type: " + expr_type)
         return []

@@ -77,7 +77,7 @@ class MultiLabel:
 
     def copy(self):
         # Patterns do not need to be copied as they wont be chaned throughtout the program I think
-        ml = MultiLabel(self.get_patterns())
+        ml = MultiLabel(self.get_patterns(), self.is_context())
 
         for pattern, labels in self._labels.items():
             ml.set_label_pair(pattern, labels)

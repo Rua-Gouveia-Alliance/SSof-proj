@@ -161,9 +161,13 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
         if assigned_name != "":
             multilabelling.set_multilabel(assigned_name, rhs_multilabel)
 
-        # I might be missing something but the returned Multilabel might be
-        # irrelevant in this case
-        return MultiLabel()
+        # If we have c = (a = b), we want c to have the multilabel of b with a
+        # added as source
+        line = expr["loc"]["start"]["line"]
+        res_multilabel = rhs_multilabel.copy()
+        res_multilabel.add_source(assigned_name, line)
+
+        return res_multilabel
     else:
         print("Unrecognized expression type: " + expr_type)
         return MultiLabel()

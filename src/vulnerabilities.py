@@ -16,14 +16,11 @@ class Vulnerabilities:
             (
                 i
                 for i, item in enumerate(self._vulnerabilities[pattern.get_name()])
-                if same_sources(item[0], label) and item[1] == sink
+                if item[1] == sink
             ),
             -1,
         )
 
-    # Assuming the multilabel was already filtered to only contain the labels
-    # with sink in its pattern
-    # TODO: extract all vulnerabilities from the multilabel
     def store_vulnerabilities(self, ml: "MultiLabel", sink: tuple):
         for pattern, label in ml.get_mapping():
             index = self.find_entry(pattern, label["explicit"], sink)
@@ -56,8 +53,6 @@ class Vulnerabilities:
                     vuln["source"] = list(source)
                     vuln["sink"] = list(sink)
 
-                    # TODO: Fix bug in Label so that flows with same source/sink
-                    # are grouped in list of lists of sanitizers
                     vuln["unsanitized_flows"] = "yes" if [] in sanitizer_flows else "no"
 
                     without_unsanitized = [

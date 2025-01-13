@@ -32,17 +32,14 @@ def print_ast(currobj, indent):
             print_ast(val, indent + 1)
 
 
-# TODO: Assumes sources/sanitizers/sinks are simple names without ".". We can
-# try to augment it to consider these cases although it would only count as
-# bonus work
 def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
     expr_type = expr["type"]
 
     if expr_type == "Literal":
         # A literal has the highest possible integrity for all patterns
-        return MultiLabel()
+        return MultiLabel(policy.get_patterns())
     elif expr_type == "TemplateLiteral":
-        ml = MultiLabel()
+        ml = MultiLabel(policy.get_patterns())
         for e in expr["expressions"]:
             ml += walk_expression(e, policy, multilabelling, vulnerabilities, context)
         return ml
@@ -66,7 +63,7 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
                 ml = MultiLabel(policy.get_patterns())
                 ml.add_source_to_all(var_name, line)
             else:
-                return MultiLabel()
+                return MultiLabel(policy.get_patterns())
         return ml
     elif expr_type == "UnaryExpression":
         return walk_expression(
@@ -104,7 +101,7 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
             callee_multilabel.add_source(callee_name, line)
 
         # Get Multilabel of all arguments
-        arg_multilabel = MultiLabel()
+        arg_multilabel = MultiLabel(policy.get_patterns())
         for arg in expr["arguments"]:
             arg_multilabel += walk_expression(
                 arg, policy, multilabelling, vulnerabilities, context
@@ -145,14 +142,6 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
             expr["right"], policy, multilabelling, vulnerabilities, context
         )
 
-        # Uncomment this if shenanigans such as "a.b().c = d" have to be
-        # considered. If so, a way to speed up the program would be to skip
-        # get_lhs skips and augment the Json nodes to store information if a
-        # certain name is a sink or not. The higher level node will get that
-        # information after visiting the child and augment it to its parent and
-        # so on. The AssignmentExpression, in the end, will have a list of sinks
-        # of the lhs.
-        # walk_expression(expr["left"], policy, multilabelling, vulnerabilities)
         lhs_sinks = get_lhs_sinks(expr["left"], policy)
         rhs_multilabel += context
 
@@ -184,7 +173,7 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
         return new_context + consequent + alternate
     else:
         print("Unrecognized expression type: " + expr_type)
-        return MultiLabel()
+        return MultiLabel(policy.get_patterns())
 
 
 def get_expr_name(expr):
@@ -347,14 +336,14 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities, context):
                     stmt["test"], policy, cycle_multilabelling, vulnerabilities, context
                 )
                 if "test" in stmt
-                else MultiLabel()
+                else MultiLabel(policy.get_patterns())
             )
 
             new_context = context + cond
 
             prev_multilabelling = res_multilabelling.copy()
             cycle_multilabelling = walk_statement(
-                stmt["body"], policy, cycle_multilabelling, vulnerabilities, new_context
+                stmt["body"], policy, cycle_multilabelling, vulnerabilities, new_context.copy()
             )
 
             if "update" in stmt:
@@ -363,7 +352,7 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities, context):
                     policy,
                     cycle_multilabelling,
                     vulnerabilities,
-                    new_context,
+                    new_context.copy(),
                 )
             res_multilabelling += cycle_multilabelling
 

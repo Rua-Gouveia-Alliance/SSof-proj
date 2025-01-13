@@ -166,7 +166,7 @@ def walk_expression(expr, policy, multilabelling, vulnerabilities, context):
         if assigned_name != "":
             multilabelling.set_multilabel(assigned_name, rhs_multilabel)
 
-        return lhs_multilabel + res_multilabel
+        return lhs_multilabel + rhs_multilabel
     else:
         print("Unrecognized expression type: " + expr_type)
         return MultiLabel()
@@ -349,7 +349,7 @@ def extract_ast(filename):
         program = f.read()
 
     ast_dict = esprima.parseScript(program, loc=True).toDict()
-    print(json.dumps(ast_dict, indent=2))
+    # print(json.dumps(ast_dict, indent=2))
     return ast_dict
 
 

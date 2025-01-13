@@ -2,7 +2,6 @@ import sys
 import esprima
 import json
 import os
-from copy import deepcopy
 from src.multilabel import MultiLabel
 from src.multilabelling import MultiLabelling
 from src.pattern import Pattern

@@ -279,11 +279,22 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities, context):
         new_context = context + cond
 
         # Evaluate each case independently
-        res_multilabelling = multilabelling.copy()
+        case_multilabellings = []
+        base_multilabelling = multilabelling.copy()
         for caseStmt in stmt["cases"]:
-            res_multilabelling += walk_statement(
-                caseStmt, policy, multilabelling.copy(), vulnerabilities, new_context
+            case_multilabellings.append(
+                walk_statement(
+                    caseStmt,
+                    policy,
+                    base_multilabelling.copy(),
+                    vulnerabilities,
+                    new_context,
+                )
             )
+
+        res_multilabelling = case_multilabellings[0]
+        for m in case_multilabellings:
+            res_multilabelling += m
         return res_multilabelling
     elif stmt_type == "SwitchCase":
         # "test" is not present in the "default" case
@@ -310,10 +321,10 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities, context):
 
         return consequent
     elif stmt_type == "BreakStatement":
-        return multilabelling.copy()  # Do nothing
+        return multilabelling  # Do nothing
     else:
         print("Unrecognized statement type: " + stmt_type)
-        return multilabelling.copy()  # Do nothing
+        return multilabelling  # Do nothing
 
 
 def load_patterns(filename):

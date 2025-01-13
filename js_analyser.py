@@ -316,6 +316,30 @@ def walk_statement(stmt, policy, multilabelling, vulnerabilities, context):
         return consequent
     elif stmt_type == "BreakStatement":
         return multilabelling  # Do nothing
+    elif stmt_type == "ForStatement":
+        if "init" in stmt:
+            walk_expression(stmt["init"], policy, multilabelling, vulnerabilities, context)
+
+        prev_multilabelling = None
+        cycle_multilabelling = multilabelling.copy()
+        res_multilabelling = multilabelling.copy()
+        while prev_multilabelling != res_multilabelling:
+            cond = walk_expression(
+                stmt["test"], policy, cycle_multilabelling, vulnerabilities, context
+            ) if "test" in stmt else MultiLabel()
+
+            new_context = context + cond
+
+            prev_multilabelling = res_multilabelling.copy()
+            cycle_multilabelling = walk_statement(
+                stmt["body"], policy, cycle_multilabelling, vulnerabilities, new_context
+            )
+
+            if "update" in stmt:
+                walk_expression(stmt["update"], policy, cycle_multilabelling, vulnerabilities, new_context)
+            res_multilabelling += cycle_multilabelling
+
+        return res_multilabelling
     else:
         print("Unrecognized statement type: " + stmt_type)
         return multilabelling  # Do nothing

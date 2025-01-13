@@ -8,3 +8,5 @@ switch (c) {
     d = "xpto2";
 }
 e(d,"hello");
+
+// switch cases can encode implicit flows
